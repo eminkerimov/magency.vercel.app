@@ -9,6 +9,7 @@ import Layer37 from "../assets/img/Layer37.png";
 const Blog = () => {
   const blogs = [
     {
+      id:1,
       day: 22,
       month: "Sep",
       year: 2013,
@@ -21,6 +22,7 @@ const Blog = () => {
       img: Layer32
     },
     {
+      id:2,
       day: 15,
       month: "Oct",
       year: 2015,
@@ -33,6 +35,7 @@ const Blog = () => {
       img: Layer33
     },
     {
+      id:3,
       day: 8,
       month: "May",
       year: 2018,
@@ -45,6 +48,7 @@ const Blog = () => {
       img: Layer34
     },
     {
+      id:4,
       day: 3,
       month: "Jan",
       year: 2020,
@@ -68,7 +72,7 @@ const Blog = () => {
           <div className="row">
             <div className="col-md-9">
               {blogs.map((item, index) => (
-                <BlogItem blog={item} key={index} />
+                <BlogItem blog={item} key={index}/>
               ))}
             </div>
             <div className="col-md-3">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const BlogItem = ({blog, key}) => {
+const BlogItem = ({blog, id}) => {
     const navigate = useNavigate();
 
   return (
@@ -19,7 +19,7 @@ const BlogItem = ({blog, key}) => {
             </div>
             <div className="blog-item__content__text">
                 <p>{blog?.desc}</p>
-                <a href="#" onClick={()=> navigate('/innerblog')}>Read More <i className="fa fa-angle-right" aria-hidden="true"></i></a>
+                <p onClick={()=> navigate(`/blog/${blog?.id}`)}>Read More <i className="fa fa-angle-right" aria-hidden="true"></i></p>
                 <span className="calendar">{blog?.month} {blog?.day}, {blog?.year}</span>
             </div>
         </div>

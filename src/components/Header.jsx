@@ -18,7 +18,7 @@ const Header = () => {
                     <li><a href="#services">Service</a></li>
                     <li><a href="#portfolio">Portfolio</a></li>
                     <li><a href="#team">Team</a></li>
-                    <li><a href="#" onClick={() => navigate("/blog")}>Blog</a></li>
+                    <li><a href="#" onClick={() => navigate("/blogs")}>Blog</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
             </div>

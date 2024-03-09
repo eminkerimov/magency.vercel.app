@@ -29,11 +29,11 @@ const router =createBrowserRouter([
         element:<Home/>
       },
       {
-        path:"/blog",
+        path:"/blogs",
         element:<Blog/>
       },
       {
-        path:"/innerblog",
+        path:"/blog/:id",
         element:<InnerBlog/>
       },
     ]
