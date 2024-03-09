@@ -3,7 +3,7 @@
   & .blog-item {
     @include flex();
     padding-right: 40px;
-    margin-bottom: 80px;
+    margin-bottom: 40px;
   }
   & .blog-item__info {
     @include blog-item-info;
@@ -47,14 +47,15 @@
         text-align: justify;
       }
       & p:first-child {
-        margin-bottom: 20px;
+        margin-bottom: 0px;
       }
       & a {
         font-size: 14px;
-        color: $color4;
+        color: $color1;
         line-height: 1.714;
         display: inline-block;
         margin-top: 6px;
+        font-weight: bold;
       }
       .calendar{
         display: none;
@@ -88,7 +89,7 @@
         }
         &:nth-child(4) {
           color: $color2;
-          margin-right: 17px;
+          margin-right: 10px;
         }
         &:nth-child(5) {
           margin-right: 10px;
@@ -100,10 +101,10 @@
       color: $color11;
       @extend %transition;
     }
-    & ul li:nth-child(5) a:hover i {
+    & ul li:nth-child(5) a i {
       color: $color1;
     }
-    & ul li:nth-child(6) a:hover i {
+    & ul li:nth-child(6) a i {
       color: #3b5997;
     }
   }
