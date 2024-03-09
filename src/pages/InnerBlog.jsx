@@ -25,7 +25,7 @@ const InnerBlog = () => {
                 </div>
                 <div className="blog-item__content">
                   <h2 className="inner-title">
-                    Lorem Ipsum is simply dummy text of the printing .
+                  Embarking on a Profound Journey into the Intricacies of Web Development
                   </h2>
                   <div className="blog-content__social inner-social">
                     <ul>
