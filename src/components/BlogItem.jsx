@@ -19,7 +19,7 @@ const BlogItem = ({blog, id}) => {
             </div>
             <div className="blog-item__content__text">
                 <p>{blog?.desc}</p>
-                <p onClick={()=> navigate(`/blog/${blog?.id}`)}>Read More <i className="fa fa-angle-right" aria-hidden="true"></i></p>
+                <a onClick={()=> navigate(`/blog/${blog?.id}`)}>Read More <i className="fa fa-angle-right" aria-hidden="true"></i></a>
                 <span className="calendar">{blog?.month} {blog?.day}, {blog?.year}</span>
             </div>
         </div>
