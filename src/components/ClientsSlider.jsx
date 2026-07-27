@@ -1,67 +1,100 @@
-import React from "react";
-import { useRef } from "react";
-import Slider from "react-slick";
+import React, { useState } from "react";
+import mayaPhoto from "../assets/img/testimonial-maya.jpg";
+import danielPhoto from "../assets/img/testimonial-daniel.jpg";
+import priyaPhoto from "../assets/img/testimonial-priya.jpg";
+
+const testimonials = [
+  {
+    text: "M-Agency turns difficult frontend topics into clear, practical guidance. The examples are focused enough to apply directly to production work.",
+    name: "Maya Chen",
+    role: "Frontend Engineer",
+    photo: mayaPhoto,
+  },
+  {
+    text: "The backend articles explain tradeoffs instead of prescribing a single tool. I regularly share them during architecture reviews with my team.",
+    name: "Daniel Ortiz",
+    role: "Staff Engineer",
+    photo: danielPhoto,
+  },
+  {
+    text: "The production checklists are concise, current, and grounded in real incidents. They have become a useful part of our release process.",
+    name: "Priya Nair",
+    role: "Platform Engineer",
+    photo: priyaPhoto,
+  },
+];
+
+const TestimonialAuthor = ({ testimonial }) => (
+  <div className="testimonial-author">
+    <p>
+      <strong>{testimonial.name}</strong>
+      <span>, {testimonial.role}</span>
+    </p>
+  </div>
+);
 
 const ClientsSlider = () => {
-  const sliderRef = useRef(null);
-
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 2000,
-    autoplay: true,
-    autoplaySpeed: 2500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
-
-  const handlePrev = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickPrev();
-    }
-  };
-
-  const handleNext = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickNext();
-    }
-  };
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeTestimonial = testimonials[activeIndex];
 
   return (
-    <>
-      <section className="clients">
-        <div className="container">
-          <div className="section-title padding">What Clients Say</div>
-          <div className="clients-comment">
-            <Slider ref={sliderRef} {...settings}>
-              <div className="clients-comment__item">
-                <p className="clients-comment__item-text">
-                The modern and intuitive design has significantly improved user experience, and the feedback from our clients has been overwhelmingly positive. Thank you for bringing our online presence to the next level!
-                </p>
-                <span className="clients-comment__item-name">John Dove</span>
+    <section className="clients">
+      <div className="container">
+        <header className="clients__heading">
+          <h2 className="section-title">What Readers Say</h2>
+        </header>
+
+        <div className="clients__layout">
+          <article
+            className="testimonial-quote"
+            id="testimonial-panel"
+            role="tabpanel"
+            aria-labelledby={`testimonial-tab-${activeIndex}`}
+            aria-live="polite"
+          >
+            <span className="testimonial-quote__mark" aria-hidden="true">“</span>
+            <div className="testimonial-quote__visual" key={`portrait-${activeIndex}`}>
+              <span className="testimonial-quote__index" aria-hidden="true">
+                0{activeIndex + 1}
+              </span>
+              <div className="testimonial-quote__portrait">
+                <img src={activeTestimonial.photo} alt={activeTestimonial.name} />
               </div>
-              <div className="clients-comment__item">
-                <p className="clients-comment__item-text">
-                The team was responsive, understanding our needs and incorporating our vision seamlessly into the website. The end result is a polished and professional site that truly represents our brand. Highly recommend!
-                </p>
-                <span className="clients-comment__item-name">Marta Luten</span>
-              </div>
-              <div className="clients-comment__item">
-                <p className="clients-comment__item-text">
-                The site's mobile-friendly design and streamlined navigation have made it easier for our clients to connect with us. Thank you for a job well done!
-                </p>
-                <span className="clients-comment__item-name">Rose Smiten</span>
-              </div>
-            </Slider>
+            </div>
+            <div className="testimonial-quote__body" key={activeIndex}>
+              <blockquote>{activeTestimonial.text}</blockquote>
+              <TestimonialAuthor testimonial={activeTestimonial} />
+            </div>
+          </article>
+
+          <div className="clients__readers" role="tablist" aria-label="Reader testimonials">
+            {testimonials.map((testimonial, index) => (
+              <button
+                className={`testimonial-reader${activeIndex === index ? " is-active" : ""}`}
+                id={`testimonial-tab-${index}`}
+                key={testimonial.name}
+                type="button"
+                role="tab"
+                aria-controls="testimonial-panel"
+                aria-selected={activeIndex === index}
+                onClick={() => setActiveIndex(index)}
+              >
+                <img
+                  className="testimonial-reader__avatar"
+                  src={testimonial.photo}
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span className="testimonial-reader__identity">
+                  <strong>{testimonial.name}</strong>
+                  <span>{testimonial.role}</span>
+                </span>
+              </button>
+            ))}
           </div>
-          <button className="clients-arrow__left" onClick={handlePrev}></button>
-          <button
-            className="clients-arrow__right"
-            onClick={handleNext}
-          ></button>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 

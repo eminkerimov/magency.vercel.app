@@ -1,30 +1,68 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Logo from "../assets/img/logo.png"
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
+const navigation = [
+    { label: 'Home', href: '/' },
+    { label: 'Articles', href: '/blogs' },
+    { label: 'Categories', href: '/#services' },
+    { label: 'About', href: '/#team' },
+    { label: 'Pricing', href: '/#pricing' },
+    { label: 'Contact', href: '/#contact' },
+]
 
 const Header = () => {
-    const navigate = useNavigate()
+    const { pathname, hash } = useLocation()
+    const [menuOpen, setMenuOpen] = useState(false)
+
+    const isActive = (href) => {
+        if (href === '/blogs') return pathname.startsWith('/blog')
+        if (href === '/') return pathname === '/' && !hash
+
+        return pathname === '/' && hash === href.replace('/', '')
+    }
+
   return (
-    <header>
-    <div className="container">
-        <div className="row">
-            <div className="col-3">
-                <span className="logo" onClick={() => navigate("/")}>M-Agency</span>
-            </div>
-            <div className="offset-3"></div>
-            <div className="col-6">
+    <header className="site-header">
+        <div className="container">
+            <div className="site-header__inner">
+                <a className="logo" href="/" aria-label="M-Agency home">
+                    <span className="logo__mark" aria-hidden="true">M</span>
+                    <span>M-Agency</span>
+                </a>
+                <nav className={`site-nav${menuOpen ? ' is-open' : ''}`} aria-label="Primary navigation">
                 <ul className="menu">
-                    <li><a href="#" onClick={() => navigate("/")}>Home</a></li>
-                    <li><a href="#services">Service</a></li>
-                    <li><a href="#portfolio">Portfolio</a></li>
-                    <li><a href="#team">Team</a></li>
-                    <li><a href="#" onClick={() => navigate("/blogs")}>Blog</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    {navigation.map((item) => {
+                        const active = isActive(item.href)
+
+                        return (
+                            <li key={item.label}>
+                                <a
+                                    className={active ? 'is-active' : ''}
+                                    href={item.href}
+                                    aria-current={active ? 'page' : undefined}
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    {item.label}
+                                </a>
+                            </li>
+                        )
+                    })}
                 </ul>
+                </nav>
+                <a className="site-header__cta" href="/#pricing">Subscribe</a>
+                <button
+                    className="site-header__toggle"
+                    type="button"
+                    aria-label="Toggle navigation"
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((open) => !open)}
+                >
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
-    </div>
-</header>
+    </header>
   )
 }
 

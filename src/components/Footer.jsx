@@ -26,7 +26,7 @@ const Footer = () => {
             </div>
             <div className="col-12">
                 <div className="footer-copyright">
-                    <p>Copyright © 2013 Designed by cssauthor.com</p>
+                    <p>Copyright © 2026 M-Agency. Practical knowledge for developers.</p>
                 </div>
             </div>
         </div>

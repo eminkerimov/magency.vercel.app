@@ -3,40 +3,47 @@ import React from "react";
 const Services = () => {
   const services = [
     {
-      name: "Custom Designs",
-      iconClass: "fa fa-rocket",
-      desc: "Unique online presence tailored to your brand's essence through custom designs",
+      name: "Frontend",
+      iconClass: "fa fa-code",
+      desc: "React patterns, browser APIs, performance techniques, and accessible interface engineering",
     },
     {
-      name: "Web Design",
-      iconClass: "fa fa-desktop",
-      desc: "Professional websites combining aesthetics and functionality for an impactful online experience",
+      name: "Backend",
+      iconClass: "fa fa-database",
+      desc: "APIs, databases, distributed systems, and reliable server-side development practices",
     },
     {
-      name: "Blog Pages",
-      iconClass: "fa fa-lightbulb-o",
-      desc: "Engaging and visually appealing blog layouts for a captivating content showcase",
+      name: "DevOps & Cloud",
+      iconClass: "fa fa-cloud",
+      desc: "Deployment workflows, observability, containers, and infrastructure lessons from production",
     },
     {
-      name: "Mobile Friendly",
-      iconClass: "fa fa-mobile",
-      desc: "Responsive designs ensuring a seamless user experience across devices, anytime, anywhere",
+      name: "Engineering Career",
+      iconClass: "fa fa-compass",
+      desc: "Practical guidance for growing technical skills, leading teams, and navigating developer careers",
     },
   ];
 
   return (
-    <section className="services" id="services">
+    <section className="categories" id="services">
       <div className="container">
-        <div className="row">
+        <div className="categories__heading">
+          <span>Explore by topic</span>
+          <h2>Categories</h2>
+          <p>Focused collections for every stage of building and growing modern software.</p>
+        </div>
+        <div className="categories__grid">
           {services.map((service, indx) => (
-            <div className="col-3" key={indx}>
-              <div className="section-item">
+            <a className="category-card" href="/blogs" key={indx}>
+              <div className="category-card__icon">
                 <i className={service.iconClass} aria-hidden="true"></i>
-                <h1 className="section-item__name">{service.name}</h1>
-                <p className="section-item__text">{service.desc}</p>
-                <a href="#">Read More</a>
               </div>
-            </div>
+              <h3>{service.name}</h3>
+              <p>{service.desc}</p>
+              <span className="category-card__link">
+                Explore category <span aria-hidden="true">→</span>
+              </span>
+            </a>
           ))}
         </div>
       </div>

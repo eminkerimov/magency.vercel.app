@@ -15,11 +15,11 @@ const BlogItem = ({blog, id}) => {
         <h2>{blog?.title}</h2>
         <div className="blog-item__content__flex">
             <div className="blog-item__content__img">
-                <img src={blog?.img} alt="layer32"/>
+                <img src={blog?.img} alt={blog?.title}/>
             </div>
             <div className="blog-item__content__text">
                 <p>{blog?.desc}</p>
-                <a onClick={()=> navigate(`/blog/${blog?.id}`)}>Read More <i className="fa fa-angle-right" aria-hidden="true"></i></a>
+                <a onClick={()=> navigate(`/blog/${blog?.id}`)}>Read Article <i className="fa fa-angle-right" aria-hidden="true"></i></a>
                 <span className="calendar">{blog?.month} {blog?.day}, {blog?.year}</span>
             </div>
         </div>
@@ -27,7 +27,7 @@ const BlogItem = ({blog, id}) => {
             <ul>
                 <li>By <a href="#">{blog?.publisher}</a></li>
                 <li><a href="#">{blog?.commentCount} comments</a></li>
-                <li><a href="#">Tags : {blog?.tags}</a></li>
+                <li><a href="#">Topics : {blog?.tags}</a></li>
                 <li><a href="#">Share</a></li>
                 <li><a href="#"><i className="fa fa-twitter" aria-hidden="true"></i></a></li>
                 <li><a href="#"><i className="fa fa-facebook" aria-hidden="true"></i></a></li>

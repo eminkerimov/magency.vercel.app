@@ -1,56 +1,96 @@
 import React from "react";
-import { useRef } from "react";
-import Slider from "react-slick";
-import slider1 from "../assets/img/slider1.png";
-import slider2 from "../assets/img/slider2.jpg";
-import slider3 from "../assets/img/slider3.jpg";
-import slider4 from "../assets/img/slider4.jpg";
 
 const MainSlider = () => {
-  const sliderRef = useRef(null);
-  const slider = [slider1, slider2, slider3, slider4];
-
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 2000,
-    autoplay: true,
-    autoplaySpeed: 2500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    fade: true,
-  };
-
-  const handlePrev = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickPrev();
-    }
-  };
-
-  const handleNext = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickNext();
-    }
-  };
-
   return (
-    <section className="slider">
-      <div className="slider-list">
-        <Slider ref={sliderRef} {...settings}>
-          {slider.map((slide, indx) => (
-            <div className="slider-list__item" key={indx}>
-              <img src={slide} alt="slider" />
+    <section className="hero">
+      <div className="hero__shape hero__shape--one" aria-hidden="true"></div>
+      <div className="hero__shape hero__shape--two" aria-hidden="true"></div>
+      <div className="container">
+        <div className="hero__grid">
+          <div className="hero__content">
+            <span className="hero__badge">
+              <span aria-hidden="true"></span>
+              Developer Blog
+            </span>
+            <h1>
+              Build better software with <span>ideas that ship.</span>
+            </h1>
+            <p>
+              Practical engineering guides, architecture deep dives, and
+              production lessons for developers building modern products.
+            </p>
+            <div className="hero__actions">
+              <a className="hero__button hero__button--primary" href="/blogs">
+                Start Reading
+                <span aria-hidden="true">→</span>
+              </a>
+              <a className="hero__button hero__button--secondary" href="/#portfolio">
+                Explore Articles
+              </a>
             </div>
-          ))}
-        </Slider>
+          </div>
+
+          <div className="hero-visual" aria-label="Developer article publishing dashboard mockup">
+            <div className="hero-visual__glow" aria-hidden="true"></div>
+            <div className="hero-code-card">
+              <div className="hero-code-card__header">
+                <div className="hero-code-card__dots" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <span>article.tsx</span>
+                <span className="hero-code-card__status">Live</span>
+              </div>
+              <div className="hero-code-card__body">
+                <span className="code-line">
+                  <span className="code-keyword">const</span> article = <span className="code-keyword">await</span> publish({"{"}
+                </span>
+                <span className="code-line code-line--indent">
+                  topic: <span className="code-string">&quot;React architecture&quot;</span>,
+                </span>
+                <span className="code-line code-line--indent">
+                  depth: <span className="code-string">&quot;production&quot;</span>,
+                </span>
+                <span className="code-line">{"}"});</span>
+                <span className="code-line code-line--empty">&nbsp;</span>
+                <span className="code-line">
+                  <span className="code-keyword">return</span> <span className="code-tag">&lt;ArticleCard</span>
+                </span>
+                <span className="code-line code-line--indent">
+                  article={"{"}article{"}"} <span className="code-tag">/&gt;</span>;
+                </span>
+              </div>
+              <div className="hero-code-card__footer">
+                <div>
+                  <span>Editorial score</span>
+                  <strong>Production-ready</strong>
+                </div>
+                <span className="hero-code-card__published">Published</span>
+              </div>
+            </div>
+
+            <div className="hero-metric-card">
+              <div className="hero-metric-card__top">
+                <span>Weekly readers</span>
+                <strong>+12.8%</strong>
+              </div>
+              <b>24.8K</b>
+              <div className="hero-metric-card__bars" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <div className="hero-topic-card">
+              <span className="hero-topic-card__icon" aria-hidden="true">&lt;/&gt;</span>
+              <div>
+                <span>Trending topic</span>
+                <strong>System Design</strong>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="slider-content">
-        <h1>Discover M-Agency</h1>
-        <span>Unveiling Perspectives: Your Gateway to Creativity and Excellence</span>
-        <a href="#">Learn More</a>
-      </div>
-      <button className="slider-arrow__left" onClick={handlePrev}></button>
-      <button className="slider-arrow__right" onClick={handleNext}></button>
     </section>
   );
 };
