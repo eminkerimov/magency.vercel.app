@@ -19,7 +19,7 @@ const BlogItem = ({blog, id}) => {
             </div>
             <div className="blog-item__content__text">
                 <p>{blog?.desc}</p>
-                <a onClick={()=> navigate(`/blog/${blog?.id}`)}>Read Article <i className="fa fa-angle-right" aria-hidden="true"></i></a>
+                <a href={`/blog/${blog?.id}`} onClick={(e)=> { e.preventDefault(); navigate(`/blog/${blog?.id}`); }}>Read Article <i className="fa fa-angle-right" aria-hidden="true"></i></a>
                 <span className="calendar">{blog?.month} {blog?.day}, {blog?.year}</span>
             </div>
         </div>
@@ -29,8 +29,8 @@ const BlogItem = ({blog, id}) => {
                 <li><a href="/">{blog?.commentCount} comments</a></li>
                 <li><a href="/">Topics : {blog?.tags}</a></li>
                 <li><a href="/">Share</a></li>
-                <li><a href="/"><i className="fa fa-twitter" aria-hidden="true"></i></a></li>
-                <li><a href="/"><i className="fa fa-facebook" aria-hidden="true"></i></a></li>
+                <li><a href='/' aria-label='Share on Twitter'><i className='fa fa-twitter' aria-hidden='true'></i></a></li>
+                <li><a href='/' aria-label='Share on Facebook'><i className='fa fa-facebook' aria-hidden='true'></i></a></li>
             </ul>
         </div>
     </div>
