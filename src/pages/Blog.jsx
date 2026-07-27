@@ -87,17 +87,17 @@ const Blog = () => {
                     <h2 className="title">Follow M-Agency</h2>
                     <ul>
                       <li>
-                        <a href="#" className="social-fb">
+                        <a href="/" className="social-fb">
                           <i className="fa fa-facebook" aria-hidden="true"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#" className="social-tw">
+                        <a href="/" className="social-tw">
                           <i className="fa fa-twitter" aria-hidden="true"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#" className="social-gl">
+                        <a href="/" className="social-gl">
                           <i
                             className="fa fa-google-plus"
                             aria-hidden="true"
@@ -117,22 +117,22 @@ const Blog = () => {
                   <h2 className="title">Categories</h2>
                   <ul>
                     <li>
-                      <a href="#">Frontend</a>
+                      <a href="/">Frontend</a>
                     </li>
                     <li>
-                      <a href="#">Backend</a>
+                      <a href="/">Backend</a>
                     </li>
                     <li>
-                      <a href="#">DevOps &amp; Cloud</a>
+                      <a href="/">DevOps &amp; Cloud</a>
                     </li>
                     <li>
-                      <a href="#">Databases</a>
+                      <a href="/">Databases</a>
                     </li>
                     <li>
-                      <a href="#">Testing</a>
+                      <a href="/">Testing</a>
                     </li>
                     <li>
-                      <a href="#">Engineering Career</a>
+                      <a href="/">Engineering Career</a>
                     </li>
                   </ul>
                 </div>
@@ -147,7 +147,7 @@ const Blog = () => {
                   </p>
                   <div className="blog-date">
                     <span>Jul 18, 2026</span>
-                    <a href="#">
+                    <a href="/">
                       Read Article{" "}
                       <i className="fa fa-angle-right" aria-hidden="true"></i>
                     </a>
@@ -165,15 +165,15 @@ const Blog = () => {
                   <div className="blog-tags">
                     <h2 className="title">Tags</h2>
                     <div className="blog-tag-list">
-                      <a href="#">react</a>
-                      <a href="#">typescript</a>
-                      <a href="#">node.js</a>
-                      <a href="#" className="active">
+                      <a href="/">react</a>
+                      <a href="/">typescript</a>
+                      <a href="/">node.js</a>
+                      <a href="/" className="active">
                         devops
                       </a>
-                      <a href="#">testing</a>
-                      <a href="#">databases</a>
-                      <a href="#">career</a>
+                      <a href="/">testing</a>
+                      <a href="/">databases</a>
+                      <a href="/">career</a>
                     </div>
                   </div>
                 </div>
@@ -189,34 +189,34 @@ const Blog = () => {
               <div className="pagination-list">
                 <ul>
                   <li>
-                    <a href="#">
+                    <a href="/">
                       <i className="fa fa-angle-left" aria-hidden="true"></i>
                     </a>
                   </li>
                   <li>
-                    <a href="#">1</a>
+                    <a href="/">1</a>
                   </li>
                   <li>
-                    <a href="#">2</a>
+                    <a href="/">2</a>
                   </li>
                   <li>
-                    <a href="#">3</a>
+                    <a href="/">3</a>
                   </li>
                   <li>
-                    <a href="#">4</a>
+                    <a href="/">4</a>
                   </li>
                   <li>
-                    <a href="#">5</a>
+                    <a href="/">5</a>
                   </li>
                   <li>
-                    <a href="#">6</a>
+                    <a href="/">6</a>
                   </li>
                   <li>...</li>
                   <li>
-                    <a href="#">78</a>
+                    <a href="/">78</a>
                   </li>
                   <li>
-                    <a href="#">
+                    <a href="/">
                       <i className="fa fa-angle-right" aria-hidden="true"></i>
                     </a>
                   </li>

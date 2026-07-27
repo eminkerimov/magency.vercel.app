@@ -30,24 +30,24 @@ const InnerBlog = () => {
                   <div className="blog-content__social inner-social">
                     <ul>
                       <li>
-                        By <a href="#">Adrian Thomas</a>
+                        By <a href="/">Adrian Thomas</a>
                       </li>
                       <li>
-                        <a href="#">18 comments</a>
+                        <a href="/">18 comments</a>
                       </li>
                       <li>
-                        <a href="#">Topics : React, Reliability, Frontend</a>
+                        <a href="/">Topics : React, Reliability, Frontend</a>
                       </li>
                       <li>
-                        <a href="#">Share</a>
+                        <a href="/">Share</a>
                       </li>
                       <li>
-                        <a href="#">
+                        <a href="/">
                           <i className="fa fa-twitter" aria-hidden="true"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#">
+                        <a href="/">
                           <i className="fa fa-facebook" aria-hidden="true"></i>
                         </a>
                       </li>
@@ -158,10 +158,10 @@ const InnerBlog = () => {
                   </div>
                   <div className="inner-post">
                     <div className="inner-post__pagination">
-                      <a className="previous" href="#">
+                      <a className="previous" href="/">
                         Previous Article
                       </a>
-                      <a className="next" href="#">
+                      <a className="next" href="/">
                         Next Article
                       </a>
                     </div>
@@ -189,7 +189,7 @@ const InnerBlog = () => {
                       </div>
                       <div className="user-name">
                         <strong>Krishna, 19 July 2026</strong>
-                        <a href="#">Reply</a>
+                        <a href="/">Reply</a>
                         <p>
                           The distinction between render errors and rejected
                           promises is especially useful. We were expecting one
@@ -215,7 +215,7 @@ const InnerBlog = () => {
                       </div>
                       <div className="user-name">
                         <strong>Elena, 20 July 2026</strong>
-                        <a href="#">Reply</a>
+                        <a href="/">Reply</a>
                         <p>
                           Feature-level boundaries helped us keep navigation and
                           unsaved form data available during a recent rollout.
@@ -241,7 +241,7 @@ const InnerBlog = () => {
                       </div>
                       <div className="user-name">
                         <strong>Aisha, 22 July 2026</strong>
-                        <a href="#">Reply</a>
+                        <a href="/">Reply</a>
                         <p>
                           Adding the release version and feature flags to error
                           reports made regressions much faster for us to isolate.
@@ -293,17 +293,17 @@ const InnerBlog = () => {
                     <h2 className="title">Follow M-Agency</h2>
                     <ul>
                       <li>
-                        <a href="#" className="social-fb">
+                        <a href="/" className="social-fb">
                           <i className="fa fa-facebook" aria-hidden="true"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#" className="social-tw">
+                        <a href="/" className="social-tw">
                           <i className="fa fa-twitter" aria-hidden="true"></i>
                         </a>
                       </li>
                       <li>
-                        <a href="#" className="social-gl">
+                        <a href="/" className="social-gl">
                           <i
                             className="fa fa-google-plus"
                             aria-hidden="true"
@@ -323,22 +323,22 @@ const InnerBlog = () => {
                   <h2 className="title">Categories</h2>
                   <ul>
                     <li>
-                      <a href="#">Frontend</a>
+                      <a href="/">Frontend</a>
                     </li>
                     <li>
-                      <a href="#">Backend</a>
+                      <a href="/">Backend</a>
                     </li>
                     <li>
-                      <a href="#">DevOps &amp; Cloud</a>
+                      <a href="/">DevOps &amp; Cloud</a>
                     </li>
                     <li>
-                      <a href="#">Databases</a>
+                      <a href="/">Databases</a>
                     </li>
                     <li>
-                      <a href="#">Testing</a>
+                      <a href="/">Testing</a>
                     </li>
                     <li>
-                      <a href="#">Engineering Career</a>
+                      <a href="/">Engineering Career</a>
                     </li>
                   </ul>
                 </div>
@@ -353,7 +353,7 @@ const InnerBlog = () => {
                   </p>
                   <div className="blog-date">
                     <span>Jul 18, 2026</span>
-                    <a href="#">
+                    <a href="/">
                       Read Article{" "}
                       <i className="fa fa-angle-right" aria-hidden="true"></i>
                     </a>
@@ -371,15 +371,15 @@ const InnerBlog = () => {
                   <div className="blog-tags">
                     <h2 className="title">Tags</h2>
                     <div className="blog-tag-list">
-                      <a href="#">react</a>
-                      <a href="#">typescript</a>
-                      <a href="#">node.js</a>
-                      <a href="#" className="active">
+                      <a href="/">react</a>
+                      <a href="/">typescript</a>
+                      <a href="/">node.js</a>
+                      <a href="/" className="active">
                         devops
                       </a>
-                      <a href="#">testing</a>
-                      <a href="#">databases</a>
-                      <a href="#">career</a>
+                      <a href="/">testing</a>
+                      <a href="/">databases</a>
+                      <a href="/">career</a>
                     </div>
                   </div>
                 </div>

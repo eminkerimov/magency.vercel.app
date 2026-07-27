@@ -25,12 +25,12 @@ const BlogItem = ({blog, id}) => {
         </div>
         <div className="blog-content__social">
             <ul>
-                <li>By <a href="#">{blog?.publisher}</a></li>
-                <li><a href="#">{blog?.commentCount} comments</a></li>
-                <li><a href="#">Topics : {blog?.tags}</a></li>
-                <li><a href="#">Share</a></li>
-                <li><a href="#"><i className="fa fa-twitter" aria-hidden="true"></i></a></li>
-                <li><a href="#"><i className="fa fa-facebook" aria-hidden="true"></i></a></li>
+                <li>By <a href="/">{blog?.publisher}</a></li>
+                <li><a href="/">{blog?.commentCount} comments</a></li>
+                <li><a href="/">Topics : {blog?.tags}</a></li>
+                <li><a href="/">Share</a></li>
+                <li><a href="/"><i className="fa fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a href="/"><i className="fa fa-facebook" aria-hidden="true"></i></a></li>
             </ul>
         </div>
     </div>
