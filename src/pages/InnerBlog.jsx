@@ -1,395 +1,361 @@
-import React from "react";
-import Layer32 from "../assets/img/Layer32.png";
-import Layer38 from "../assets/img/Layer38.png";
-import Layer37 from "../assets/img/Layer37.png";
-import teammember2 from "../assets/img/teammember2.jpg";
-import teammember1 from "../assets/img/teammember1.jpg";
-import teammember3 from "../assets/img/teammember3.jpg";
-import teammember4 from "../assets/img/teammember4.jpg";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
+import { articles } from "../data/data";
+
+const formatDate = (date) =>
+  new Intl.DateTimeFormat("en", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
 
 const InnerBlog = () => {
-  return (
-    <>
-      <section className="cover">
-        <h1>Articles</h1>
-      </section>
-      <section className="blog-section">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-9">
-              <div className="blog-item">
-                <div className="blog-item__info">
-                  <h4>18</h4>
-                  <span>Jul</span>
-                  <span>2026</span>
-                </div>
-                <div className="blog-item__content">
-                  <h2 className="inner-title">
-                  Building Resilient React Interfaces with Modern Error Boundaries
-                  </h2>
-                  <div className="blog-content__social inner-social">
-                    <ul>
-                      <li>
-                        By <a href="/">Adrian Thomas</a>
-                      </li>
-                      <li>
-                        <a href="/">18 comments</a>
-                      </li>
-                      <li>
-                        <a href="/">Topics : React, Reliability, Frontend</a>
-                      </li>
-                      <li>
-                        <a href="/">Share</a>
-                      </li>
-                      <li>
-                        <a href="/">
-                          <i className="fa fa-twitter" aria-hidden="true"></i>
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/">
-                          <i className="fa fa-facebook" aria-hidden="true"></i>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-item__content__flex">
-                    <div className="blog-item__content__img">
-                      <img src={Layer32} alt="layer32" />
-                    </div>
-                    <div className="blog-item__content__text">
-                      <p>
-                        A resilient React interface assumes that requests,
-                        third-party code, and unexpected data will eventually
-                        fail. One broken widget should not replace an entire
-                        application with a blank screen. The goal is to contain
-                        the failure, preserve useful context, and give the user
-                        a clear path back to a working state.
-                      </p>
-                      <p>
-                        Error boundaries provide that containment for render
-                        failures. Used deliberately, they become part of the
-                        application architecture rather than a last-minute
-                        fallback screen.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="blog-inner__content">
-                    <p>
-                      Place boundaries around meaningful product areas: the
-                      editor, account panel, search results, or any feature that
-                      can fail independently. A single boundary at the root is
-                      still useful, but it cannot preserve the rest of the page
-                      when one isolated feature throws during rendering.
-                    </p>
-                    <p>
-                      A boundary catches errors in descendants during rendering
-                      and lifecycle work. It does not replace validation for
-                      event handlers, rejected promises, server responses, or
-                      errors thrown inside the boundary itself. Those paths
-                      still need explicit error handling and well-defined state.
-                    </p>
-                    <h3>
-                      Treat every failure state as a product state with a clear
-                      recovery action.
-                    </h3>
-                    <p>
-                      Recovery UI should explain what failed without exposing
-                      internal details. Offer a focused retry when it is safe,
-                      preserve unsaved input where possible, and provide a route
-                      to support when repeated attempts cannot restore the
-                      feature.
-                    </p>
-                    <div className="blog-inner__content__img">
-                      <img src={Layer38} alt="layer-38" />
-                    </div>
-                    <p>
-                      Observability turns a graceful fallback into an actionable
-                      engineering signal. Report the original error together
-                      with the component stack and the boundary that handled it.
-                    </p>
-                    <p>
-                      Include the route, release version, relevant feature flag,
-                      and a correlation identifier, while excluding private user
-                      data. Monitor fallback frequency after each deployment;
-                      a boundary should reduce impact, not make regressions easy
-                      to ignore.
-                    </p>
-                    <blockquote>
-                      A boundary is useful only when it contains the failure,
-                      explains the next step, and leaves enough context to debug
-                      the cause.
-                    </blockquote>
-                    <p>Adrian Thomas</p>
-                  </div>
-                  <div className="blog-inner__share">
-                    <fieldset>
-                      <legend>Share this article</legend>
-                      <ul>
-                        <li>
-                          <a
-                            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-                            className="twitter-share-button"
-                            data-show-count="false"
-                          >
-                            Tweet
-                          </a>
-                        </li>
-                        <li>2,085</li>
-                        <li>
-                          <div
-                            className="fb-share-button"
-                            data-href="https://developers.facebook.com/docs/plugins/"
-                            data-layout="button_count"
-                            data-size="small"
-                          >
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse"
-                              className="fb-xfbml-parse-ignore"
-                            >
-                              Like
-                            </a>
-                          </div>
-                        </li>
-                        <li>20 K</li>
-                      </ul>
-                    </fieldset>
-                  </div>
-                  <div className="inner-post">
-                    <div className="inner-post__pagination">
-                      <a className="previous" href="/">
-                        Previous Article
-                      </a>
-                      <a className="next" href="/">
-                        Next Article
-                      </a>
-                    </div>
-                    <h2 className="title">Recent Articles</h2>
-                    <ul className="inner-post__recent">
-                      <li>
-                        Testing React Server Components
-                      </li>
-                      <li>
-                        Reliable Background Jobs in Node.js
-                      </li>
-                      <li>
-                        Reading PostgreSQL Query Plans
-                      </li>
-                      <li>
-                        Writing Useful Incident Reviews
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="blog-comment">
-                    <h2 className="title">5 Comments</h2>
-                    <div className="blog-comment__content">
-                      <div className="profile-img">
-                        <img src={teammember2} alt="user_name" />
-                      </div>
-                      <div className="user-name">
-                        <strong>Krishna, 19 July 2026</strong>
-                        <a href="/">Reply</a>
-                        <p>
-                          The distinction between render errors and rejected
-                          promises is especially useful. We were expecting one
-                          boundary to handle both paths in our dashboard.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="blog-comment__content reply">
-                      <div className="profile-img">
-                        <img src={teammember1} alt="user_name" />
-                      </div>
-                      <div className="user-name">
-                        <strong>Russel, 19 July 2026</strong>
-                        <p>
-                          We made the same assumption. Handling request state
-                          separately also gave us much better retry behavior.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="blog-comment__content">
-                      <div className="profile-img">
-                        <img src={teammember3} alt="user_name" />
-                      </div>
-                      <div className="user-name">
-                        <strong>Elena, 20 July 2026</strong>
-                        <a href="/">Reply</a>
-                        <p>
-                          Feature-level boundaries helped us keep navigation and
-                          unsaved form data available during a recent rollout.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="blog-comment__content reply">
-                      <div className="profile-img">
-                        <img src={teammember4} alt="user_name" />
-                      </div>
-                      <div className="user-name">
-                        <strong>Zarina, 20 July 2026</strong>
-                        <p>
-                          That is a good example of choosing boundaries around
-                          user tasks instead of matching the component tree
-                          mechanically.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="blog-comment__content ">
-                      <div className="profile-img">
-                        <img src={teammember3} alt="user_name" />
-                      </div>
-                      <div className="user-name">
-                        <strong>Aisha, 22 July 2026</strong>
-                        <a href="/">Reply</a>
-                        <p>
-                          Adding the release version and feature flags to error
-                          reports made regressions much faster for us to isolate.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="blog-inner__form">
-                    <h2 className="title">Leave a Comment</h2>
-                    <form action="#">
-                      <div className="row">
-                        <div className="col-md-6 col-sm-6">
-                          <input type="text" placeholder="Your name*" />
-                        </div>
-                        <div className="col-md-6 col-sm-6">
-                          <input type="email" placeholder="Email address*" />
-                        </div>
-                        <div className="col-md-12 col-sm-12 col-12">
-                          <textarea
-                            placeholder="Write your comment..."
-                            cols="30"
-                            rows="10"
-                          ></textarea>
-                        </div>
-                        <div className="col-md-8 col-sm-8 col-8 elem-flex">
-                          <input type="checkbox" name="check" id="check" />
-                          <label for="check">
-                            Notify me about replies by email
-                          </label>
-                        </div>
-                        <div className="col-md-4 col-sm-4 col-4">
-                          <button type="submit">Post Comment</button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3">
-              <aside className="blog-right">
-                <div className="blog-form">
-                  <form action="">
-                    <div className="search-box">
-                      <input type="text" placeholder="Search articles" />
-                    </div>
-                  </form>
-                  <div className="blog-form-social">
-                    <h2 className="title">Follow M-Agency</h2>
-                    <ul>
-                      <li>
-                        <a href="/" className="social-fb">
-                          <i className="fa fa-facebook" aria-hidden="true"></i>
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/" className="social-tw">
-                          <i className="fa fa-twitter" aria-hidden="true"></i>
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/" className="social-gl">
-                          <i
-                            className="fa fa-google-plus"
-                            aria-hidden="true"
-                          ></i>
-                        </a>
-                      </li>
-                    </ul>
-                    <form action="#">
-                      <input type="email" placeholder="Email address" />
-                      <button className="blog-btn" type="submit">
-                        Join Newsletter
-                      </button>
-                    </form>
-                  </div>
-                </div>
-                <div className="blog-categories">
-                  <h2 className="title">Categories</h2>
-                  <ul>
-                    <li>
-                      <a href="/">Frontend</a>
-                    </li>
-                    <li>
-                      <a href="/">Backend</a>
-                    </li>
-                    <li>
-                      <a href="/">DevOps &amp; Cloud</a>
-                    </li>
-                    <li>
-                      <a href="/">Databases</a>
-                    </li>
-                    <li>
-                      <a href="/">Testing</a>
-                    </li>
-                    <li>
-                      <a href="/">Engineering Career</a>
-                    </li>
-                  </ul>
-                </div>
-                <div className="blog-post">
-                  <h2 className="title">Popular Article</h2>
-                  <div className="blog-post-img">
-                    <img src={Layer37} alt="layer-37" />
-                  </div>
-                  <p>
-                    A production-focused guide to React error boundaries,
-                    recovery states, and actionable frontend observability.
-                  </p>
-                  <div className="blog-date">
-                    <span>Jul 18, 2026</span>
-                    <a href="/">
-                      Read Article{" "}
-                      <i className="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-                  </div>
-                  <div className="blog-post-recent">
-                    <h2 className="title">Recent Articles</h2>
-                    <ul>
-                      <li>Testing React Server Components</li>
-                      <li>Reliable Background Jobs in Node.js</li>
-                      <li>Reading PostgreSQL Query Plans</li>
-                      <li>Writing Useful Incident Reviews</li>
-                    </ul>
-                  </div>
+  const { id } = useParams();
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [comment, setComment] = useState("");
+  const [commentSent, setCommentSent] = useState(false);
 
-                  <div className="blog-tags">
-                    <h2 className="title">Tags</h2>
-                    <div className="blog-tag-list">
-                      <a href="/">react</a>
-                      <a href="/">typescript</a>
-                      <a href="/">node.js</a>
-                      <a href="/" className="active">
-                        devops
-                      </a>
-                      <a href="/">testing</a>
-                      <a href="/">databases</a>
-                      <a href="/">career</a>
-                    </div>
-                  </div>
-                </div>
-              </aside>
+  const articleIndex = articles.findIndex(
+    (item) => String(item.id) === String(id)
+  );
+
+  const article = articles[articleIndex];
+
+  const relatedArticles = useMemo(() => {
+    if (!article) return [];
+
+    return articles
+      .filter(
+        (item) =>
+          item.id !== article.id &&
+          (item.category === article.category ||
+            item.tags?.some((tag) => article.tags?.includes(tag)))
+      )
+      .slice(0, 3);
+  }, [article]);
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const scrollTop =
+        window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      setReadingProgress(
+        scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0
+      );
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+
+    return () => window.removeEventListener("scroll", updateProgress);
+  }, []);
+
+  if (!article) {
+    return <Navigate to="/blogs" replace />;
+  }
+
+  const previousArticle =
+    articleIndex > 0 ? articles[articleIndex - 1] : null;
+  const nextArticle =
+    articleIndex < articles.length - 1
+      ? articles[articleIndex + 1]
+      : null;
+
+  const handleComment = (event) => {
+    event.preventDefault();
+
+    if (!comment.trim()) return;
+
+    setCommentSent(true);
+    setComment("");
+  };
+
+  return (
+    <main className="article-page">
+      <div
+        className="article-progress"
+        style={{ width: `${readingProgress}%` }}
+        aria-hidden="true"
+      />
+
+      <section className="article-hero">
+        <div className="container">
+          <Link className="article-hero__back" to="/blogs">
+            ← Back to articles
+          </Link>
+
+          <div className="article-hero__content">
+            <span className="article-hero__category">
+              {article.category}
+            </span>
+
+            <h1>{article.title}</h1>
+            <p>{article.excerpt}</p>
+
+            <div className="article-hero__meta">
+              <div>
+                <strong>{article.author}</strong>
+                <span>Engineering author</span>
+              </div>
+
+              <time dateTime={article.publishedAt}>
+                {formatDate(article.publishedAt)}
+              </time>
+
+              <span>{article.readingTime} min read</span>
+              <span>{article.commentCount} comments</span>
             </div>
           </div>
         </div>
       </section>
-    </>
+
+      <section className="article-cover">
+        <div className="container">
+          <img src={article.image} alt={article.title} />
+        </div>
+      </section>
+
+      <section className="article-content">
+        <div className="container article-content__layout">
+          <aside className="article-toc">
+            <span>On this page</span>
+            <nav>
+              <a href="#overview">Overview</a>
+              <a href="#architecture">Architecture decisions</a>
+              <a href="#implementation">Implementation</a>
+              <a href="#observability">Observability</a>
+              <a href="#conclusion">Conclusion</a>
+            </nav>
+          </aside>
+
+          <article className="article-body">
+            <section id="overview">
+              <p className="article-body__lead">
+                Production software fails in ways that are rarely visible in
+                small demos. A useful engineering approach starts by separating
+                expected failure states from unexpected faults and deciding
+                exactly where recovery belongs.
+              </p>
+
+              <p>
+                The goal is not to eliminate every error. The goal is to contain
+                impact, preserve useful context, and give both users and
+                engineers enough information to recover quickly.
+              </p>
+            </section>
+
+            <section id="architecture">
+              <h2>Architecture decisions should follow product boundaries</h2>
+
+              <p>
+                Technical boundaries work best when they match meaningful user
+                tasks. A dashboard widget, editor, billing panel, or search
+                result area can often fail independently without replacing the
+                entire application.
+              </p>
+
+              <blockquote>
+                Recovery UI is part of the product experience, not a fallback
+                added after implementation.
+              </blockquote>
+
+              <p>
+                Keep server state, local interaction state, route state, and
+                long-lived application state separate. This makes failures
+                easier to reason about and prevents a single dependency from
+                controlling unrelated areas of the interface.
+              </p>
+            </section>
+
+            <section id="implementation">
+              <h2>Make failure paths explicit in the implementation</h2>
+
+              <p>
+                Error handling becomes easier to maintain when each layer has a
+                clear responsibility. Components render states, services
+                normalize external responses, and monitoring captures enough
+                context to explain what happened.
+              </p>
+
+              <pre>
+                <code>{`async function loadArticle(id) {
+  const response = await fetch(\`/api/articles/\${id}\`);
+
+  if (!response.ok) {
+    throw new Error("Article request failed");
+  }
+
+  return response.json();
+}`}</code>
+              </pre>
+
+              <p>
+                Avoid hiding failures behind generic catch blocks. Handle known
+                states directly and reserve unexpected errors for boundaries
+                that can report and isolate them.
+              </p>
+            </section>
+
+            <section id="observability">
+              <h2>Observability must explain impact, not only errors</h2>
+
+              <p>
+                Useful reports include route, release version, affected feature,
+                correlation identifier, and the boundary that handled the
+                failure. Do not collect private user data unless it is strictly
+                necessary.
+              </p>
+
+              <ul>
+                <li>Track failure frequency by feature and release.</li>
+                <li>Measure successful recovery after retry actions.</li>
+                <li>Connect client errors with backend traces.</li>
+                <li>Review recurring fallbacks as product defects.</li>
+              </ul>
+            </section>
+
+            <section id="conclusion">
+              <h2>Conclusion</h2>
+
+              <p>
+                Reliable interfaces are designed around containment, recovery,
+                and visibility. When these decisions are made early, the
+                application stays useful during failure and the engineering
+                team receives actionable signals instead of vague reports.
+              </p>
+            </section>
+
+            <div className="article-tags">
+              {article.tags?.map((tag) => (
+                <Link key={tag} to={`/blogs?q=${encodeURIComponent(tag)}`}>
+                  {tag}
+                </Link>
+              ))}
+            </div>
+
+            <div className="article-author">
+              <div className="article-author__avatar">
+                {article.author
+                  .split(" ")
+                  .map((part) => part[0])
+                  .join("")}
+              </div>
+
+              <div>
+                <span>Written by</span>
+                <h2>{article.author}</h2>
+                <p>
+                  Engineering author focused on production architecture,
+                  reliability, and practical frontend systems.
+                </p>
+              </div>
+            </div>
+
+            <form className="article-comment" onSubmit={handleComment}>
+              <div>
+                <span>Discussion</span>
+                <h2>Leave a comment</h2>
+              </div>
+
+              <textarea
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                placeholder="Share a useful technical observation..."
+                rows="5"
+                required
+              />
+
+              <button type="submit">Post comment</button>
+
+              {commentSent && (
+                <small>Your comment was added to the demo state.</small>
+              )}
+            </form>
+          </article>
+
+          <aside className="article-share">
+            <span>Share</span>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(window.location.href)}
+            >
+              Copy link
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                article.title
+              )}&url=${encodeURIComponent(window.location.href)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              X / Twitter
+            </a>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+                window.location.href
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn
+            </a>
+          </aside>
+        </div>
+      </section>
+
+      <section className="article-navigation">
+        <div className="container">
+          {previousArticle ? (
+            <Link to={`/blog/${previousArticle.id}`}>
+              <span>Previous article</span>
+              <strong>{previousArticle.title}</strong>
+            </Link>
+          ) : (
+            <div />
+          )}
+
+          {nextArticle ? (
+            <Link to={`/blog/${nextArticle.id}`}>
+              <span>Next article</span>
+              <strong>{nextArticle.title}</strong>
+            </Link>
+          ) : (
+            <div />
+          )}
+        </div>
+      </section>
+
+      {relatedArticles.length > 0 && (
+        <section className="article-related">
+          <div className="container">
+            <div className="article-related__heading">
+              <span>Continue reading</span>
+              <h2>Related articles</h2>
+            </div>
+
+            <div className="article-related__grid">
+              {relatedArticles.map((item) => (
+                <article key={item.id}>
+                  <Link to={`/blog/${item.id}`}>
+                    <img src={item.image} alt={item.title} loading="lazy" />
+                  </Link>
+
+                  <div>
+                    <span>{item.category}</span>
+                    <h3>
+                      <Link to={`/blog/${item.id}`}>{item.title}</Link>
+                    </h3>
+                    <p>{item.excerpt}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </main>
   );
 };
 
