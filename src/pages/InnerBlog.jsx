@@ -21,6 +21,14 @@ const InnerBlog = () => {
 
   const article = articles[articleIndex];
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, [id]);
+
   const relatedArticles = useMemo(() => {
     if (!article) return [];
 
