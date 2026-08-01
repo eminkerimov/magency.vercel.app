@@ -1,11 +1,13 @@
-@import "__variables.scss",
-        "__reset.scss",
-        "__fonts.scss",
-        "__mixin.scss",
-        "./partial/_footer.scss",
-        "./partial/__header.scss",
-        "./partial/_blogItem",
-        "__innerBlog.scss",
-        "__desktop.scss",
-        "__blog.scss",
-        "__responsive.scss";
+@import "__variables";
+@import "__reset";
+@import "__fonts";
+@import "__mixin";
+
+@import "./partial/__header";
+@import "./partial/__footer";
+@import "./partial/__home";
+@import "./partial/__blogItem";
+@import "__blog";
+@import "__categories";
+@import "__innerBlog";
+@import "__responsive";
