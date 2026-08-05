@@ -110,7 +110,7 @@
 .categories-section-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 380px;
-  align-items: end;
+  align-items: flex-end;
   gap: 60px;
   margin-bottom: 40px;
 }
@@ -266,7 +266,7 @@
 }
 
 .category-track__footer {
-  align-self: end;
+  align-self: flex-end;
   margin-top: 24px;
   padding-top: 18px;
   border-top: 1px solid #e9ecf3;
@@ -316,7 +316,7 @@
 
 .categories-featured__heading {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 30px;
   margin-bottom: 38px;

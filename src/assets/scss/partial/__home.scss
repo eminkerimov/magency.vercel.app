@@ -245,7 +245,7 @@ body {
     }
 
     &__status {
-        justify-self: end;
+        justify-self: flex-end;
         padding: 5px 8px;
         border-radius: 999px;
         color: #76dac5;
@@ -1019,7 +1019,7 @@ body {
     &__heading {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
-        align-items: end;
+        align-items: flex-end;
         column-gap: 64px;
         max-width: none;
         margin-bottom: 46px;
