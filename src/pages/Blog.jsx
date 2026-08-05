@@ -1,8 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { articleCategories, articles } from "../data/data";
 
 const ITEMS_PER_PAGE = 8;
+const NORMALIZED_CATEGORIES = [
+  "All categories",
+  ...articleCategories.filter(
+    (item) => item !== "All" && item !== "All categories"
+  ),
+];
+const SORT_OPTIONS = ["newest", "oldest", "popular", "readingTime", "title"];
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -12,20 +19,21 @@ const formatDate = (date) =>
   }).format(new Date(`${date}T00:00:00`));
 
 const Blog = () => {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("All categories");
-  const [sortBy, setSortBy] = useState("newest");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get("q") || "");
+  const [category, setCategory] = useState(() => {
+    const initialCategory = searchParams.get("category");
+    return NORMALIZED_CATEGORIES.includes(initialCategory)
+      ? initialCategory
+      : "All categories";
+  });
+  const [sortBy, setSortBy] = useState(() => {
+    const initialSort = searchParams.get("sort");
+    return SORT_OPTIONS.includes(initialSort) ? initialSort : "newest";
+  });
   const [page, setPage] = useState(1);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-
-  const normalizedCategories = useMemo(() => {
-    const categories = articleCategories.filter(
-      (item) => item !== "All" && item !== "All categories"
-    );
-
-    return ["All categories", ...categories];
-  }, []);
 
   const filteredArticles = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -76,6 +84,16 @@ const Blog = () => {
   useEffect(() => {
     setPage(1);
   }, [query, category, sortBy]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+
+    if (query.trim()) nextParams.set("q", query.trim());
+    if (category !== "All categories") nextParams.set("category", category);
+    if (sortBy !== "newest") nextParams.set("sort", sortBy);
+
+    setSearchParams(nextParams, { replace: true });
+  }, [query, category, sortBy, setSearchParams]);
 
   useEffect(() => {
     if (page > totalPages) {
@@ -151,6 +169,16 @@ const Blog = () => {
     setSortBy("newest");
   };
 
+  const changePage = (nextPage) => {
+    setPage(nextPage);
+    requestAnimationFrame(() => {
+      document.querySelector(".articles-results")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
   const handleSubscribe = (event) => {
     event.preventDefault();
 
@@ -195,7 +223,7 @@ const Blog = () => {
               onChange={(event) => setCategory(event.target.value)}
               aria-label="Filter by category"
             >
-              {normalizedCategories.map((item) => (
+              {NORMALIZED_CATEGORIES.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -300,9 +328,7 @@ const Blog = () => {
                   <button
                     type="button"
                     disabled={page === 1}
-                    onClick={() =>
-                      setPage((current) => current - 1)
-                    }
+                    onClick={() => changePage(page - 1)}
                   >
                     ← Previous
                   </button>
@@ -315,7 +341,7 @@ const Blog = () => {
                       type="button"
                       key={item}
                       className={page === item ? "active" : ""}
-                      onClick={() => setPage(item)}
+                      onClick={() => changePage(item)}
                       aria-current={page === item ? "page" : undefined}
                     >
                       {item}
@@ -325,9 +351,7 @@ const Blog = () => {
                   <button
                     type="button"
                     disabled={page === totalPages}
-                    onClick={() =>
-                      setPage((current) => current + 1)
-                    }
+                    onClick={() => changePage(page + 1)}
                   >
                     Next →
                   </button>
@@ -363,7 +387,7 @@ const Blog = () => {
                 <h2>Categories</h2>
 
                 <div className="articles-category-list">
-                  {normalizedCategories.map((item) => (
+                  {NORMALIZED_CATEGORIES.map((item) => (
                     <button
                       type="button"
                       key={item}

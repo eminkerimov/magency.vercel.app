@@ -22,24 +22,27 @@ const InnerBlog = () => {
   const article = articles[articleIndex];
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "auto",
-    });
+    setComment("");
+    setCommentSent(false);
   }, [id]);
 
   const relatedArticles = useMemo(() => {
     if (!article) return [];
 
-    return articles
-      .filter(
-        (item) =>
-          item.id !== article.id &&
-          (item.category === article.category ||
-            item.tags?.some((tag) => article.tags?.includes(tag)))
-      )
-      .slice(0, 3);
+    const matchingArticles = articles.filter(
+      (item) =>
+        item.id !== article.id &&
+        (item.category === article.category ||
+          item.tags?.some((tag) => article.tags?.includes(tag)))
+    );
+
+    const fallbackArticles = articles.filter(
+      (item) =>
+        item.id !== article.id &&
+        !matchingArticles.some((match) => match.id === item.id)
+    );
+
+    return [...matchingArticles, ...fallbackArticles].slice(0, 3);
   }, [article]);
 
   useEffect(() => {
@@ -234,7 +237,39 @@ const InnerBlog = () => {
                 team receives actionable signals instead of vague reports.
               </p>
             </section>
+          </article>
 
+          <aside className="article-share">
+            <span>Share</span>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(window.location.href)}
+            >
+              Copy link
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                article.title
+              )}&url=${encodeURIComponent(window.location.href)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              X / Twitter
+            </a>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+                window.location.href
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              LinkedIn
+            </a>
+          </aside>
+        </div>
+
+        <div className="container article-content__end">
+          <div className="article-content__end-inner">
             <div className="article-tags">
               {article.tags?.map((tag) => (
                 <Link key={tag} to={`/blogs?q=${encodeURIComponent(tag)}`}>
@@ -281,35 +316,7 @@ const InnerBlog = () => {
                 <small>Your comment was added to the demo state.</small>
               )}
             </form>
-          </article>
-
-          <aside className="article-share">
-            <span>Share</span>
-            <button
-              type="button"
-              onClick={() => navigator.clipboard?.writeText(window.location.href)}
-            >
-              Copy link
-            </button>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                article.title
-              )}&url=${encodeURIComponent(window.location.href)}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              X / Twitter
-            </a>
-            <a
-              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                window.location.href
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              LinkedIn
-            </a>
-          </aside>
+          </div>
         </div>
       </section>
 

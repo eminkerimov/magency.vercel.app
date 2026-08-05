@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import teammember1 from "../assets/img/author-frontend.jpg"
 import teammember2 from "../assets/img/author-devops.jpg"
 import teammember3 from "../assets/img/author-career.jpg"
@@ -32,9 +33,9 @@ const Team = () => {
               <div className="author-tile__content">
                 <h3>{member.name}</h3>
                 <p>{member.position}</p>
-                <a href="/blogs">
-                  View profile <span aria-hidden="true">→</span>
-                </a>
+                <Link to={`/blogs?q=${encodeURIComponent(member.name)}`}>
+                  View articles <span aria-hidden="true">→</span>
+                </Link>
               </div>
             </article>
           ))}

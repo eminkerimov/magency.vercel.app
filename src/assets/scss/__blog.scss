@@ -75,7 +75,7 @@
 }
 
 .articles-content {
-  padding: 54px 0 110px;
+  padding: 54px 0 64px;
   background:
     radial-gradient(circle at 92% 8%, rgba(102,94,229,.07), transparent 24%),
     #edf1f7;
@@ -482,7 +482,7 @@
   .articles-page > section > .container { width: min(100% - 28px, 1480px); }
   .articles-hero { padding: 72px 0 68px; }
   .articles-hero__content { width: 100%; padding-right: 0; }
-  .articles-content { padding: 38px 0 76px; }
+  .articles-content { padding: 38px 0 54px; }
   .articles-toolbar { grid-template-columns: 1fr; padding: 10px; border-radius: 16px; }
   .articles-toolbar__search { grid-column: auto; }
   .articles-grid { grid-template-columns: 1fr; }

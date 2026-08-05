@@ -78,6 +78,13 @@
                 line-height: 1.4;
                 transition: color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
 
+                &:focus,
+                &:focus-visible {
+                    border: 0;
+                    outline: none;
+                    box-shadow: none;
+                }
+
                 &:hover {
                     color: #252b47;
                     background: #f2f1fb;

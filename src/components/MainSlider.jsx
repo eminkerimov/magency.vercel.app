@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const MainSlider = () => {
   return (
@@ -20,13 +21,13 @@ const MainSlider = () => {
               production lessons for developers building modern products.
             </p>
             <div className="hero__actions">
-              <a className="hero__button hero__button--primary" href="/blogs">
+              <Link className="hero__button hero__button--primary" to="/blogs">
                 Start Reading
                 <span aria-hidden="true">→</span>
-              </a>
-              <a className="hero__button hero__button--secondary" href="/#portfolio">
+              </Link>
+              <Link className="hero__button hero__button--secondary" to="/#portfolio">
                 Explore Articles
-              </a>
+              </Link>
             </div>
           </div>
 

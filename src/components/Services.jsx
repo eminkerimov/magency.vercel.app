@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Services = () => {
   const services = [
@@ -33,8 +34,12 @@ const Services = () => {
           <p>Focused collections for every stage of building and growing modern software.</p>
         </div>
         <div className="categories__grid">
-          {services.map((service, indx) => (
-            <a className="category-card" href="/blogs" key={indx}>
+          {services.map((service) => (
+            <Link
+              className="category-card"
+              to={`/blogs?category=${encodeURIComponent(service.name)}`}
+              key={service.name}
+            >
               <div className="category-card__icon">
                 <i className={service.iconClass} aria-hidden="true"></i>
               </div>
@@ -43,7 +48,7 @@ const Services = () => {
               <span className="category-card__link">
                 Explore category <span aria-hidden="true">→</span>
               </span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

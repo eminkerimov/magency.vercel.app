@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const navigation = [
@@ -13,6 +13,10 @@ const navigation = [
 const Header = () => {
   const { pathname, hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname, hash]);
 
   const isActive = (href) => {
     if (href === "/blogs") return pathname.startsWith("/blog");
@@ -38,36 +42,30 @@ const Header = () => {
             <ul className="menu">
               {navigation.map((item) => {
                 const active = isActive(item.href);
-                const isPageRoute = ["/", "/blogs", "/categories"].includes(item.href);
 
                 return (
                   <li key={item.label}>
-                    {isPageRoute ? (
-                      <Link
-                        className={active ? "is-active" : ""}
-                        to={item.href}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <a
-                        className={active ? "is-active" : ""}
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {item.label}
-                      </a>
-                    )}
+                    <Link
+                      className={active ? "is-active" : ""}
+                      to={item.href}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
                   </li>
                 );
               })}
             </ul>
           </nav>
 
-          <a className="site-header__cta" href="/#pricing">Subscribe</a>
+          <Link
+            className="site-header__cta"
+            to="/#pricing"
+            onClick={() => setMenuOpen(false)}
+          >
+            Subscribe
+          </Link>
 
           <button
             className="site-header__toggle"

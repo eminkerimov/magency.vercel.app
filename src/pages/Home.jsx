@@ -1,83 +1,32 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import ClientsSlider from '../components/ClientsSlider'
 import MainSlider from '../components/MainSlider'
 import Services from '../components/Services'
 import Team from '../components/Team'
+import { articles } from '../data/data'
 
-const featuredArticles = [
-    {
-        category: 'Frontend',
-        title: 'Building Resilient React Interfaces with Modern Error Boundaries',
-        excerpt: 'Design recovery paths that contain failures and keep the rest of your application useful.',
-        readingTime: '8 min read',
-        author: 'Adrian Thomas',
-        initials: 'AT',
-        date: 'Jul 18, 2026',
-        href: '/blog/1',
-        cover: 'react',
-        glyph: '</>',
-    },
-    {
-        category: 'Backend',
-        title: 'Designing Type-Safe APIs with Node.js and TypeScript',
-        excerpt: 'Keep validation, domain models, and response contracts aligned from request to database.',
-        readingTime: '9 min read',
-        author: 'Narate Ketram',
-        initials: 'NK',
-        date: 'Jul 11, 2026',
-        href: '/blog/2',
-        cover: 'backend',
-        glyph: '{ }',
-    },
-    {
-        category: 'DevOps',
-        title: 'Practical CI/CD for Small Engineering Teams',
-        excerpt: 'Build a deployment pipeline that stays fast, understandable, and safe as your team grows.',
-        readingTime: '7 min read',
-        author: 'Fernando Comet',
-        initials: 'FC',
-        date: 'Jul 4, 2026',
-        href: '/blog/3',
-        cover: 'devops',
-        glyph: '↗',
-    },
-    {
-        category: 'Databases',
-        title: 'PostgreSQL Query Tuning: A Production Checklist',
-        excerpt: 'Diagnose slow queries with execution plans, statistics, indexes, and application traces.',
-        readingTime: '10 min read',
-        author: 'Narate Ketram',
-        initials: 'NK',
-        date: 'Jun 27, 2026',
-        href: '/blog/4',
-        cover: 'database',
-        glyph: 'DB',
-    },
-    {
-        category: 'Testing',
-        title: 'Testing React Server Components Without Brittle Mocks',
-        excerpt: 'Test behavior at useful boundaries while keeping implementation details free to change.',
-        readingTime: '6 min read',
-        author: 'Adrian Thomas',
-        initials: 'AT',
-        date: 'Jun 20, 2026',
-        href: '/blogs',
-        cover: 'testing',
-        glyph: '✓',
-    },
-    {
-        category: 'Career',
-        title: 'Writing Incident Reviews That Improve Engineering Systems',
-        excerpt: 'Turn production failures into specific learning, safer processes, and better technical decisions.',
-        readingTime: '8 min read',
-        author: 'Adedayo Saheed',
-        initials: 'AS',
-        date: 'Jun 13, 2026',
-        href: '/blogs',
-        cover: 'career',
-        glyph: '01',
-    },
-]
+const articleThemes = {
+    1: { cover: 'react', glyph: '</>' },
+    2: { cover: 'backend', glyph: '{ }' },
+    4: { cover: 'devops', glyph: '↗' },
+}
+
+const featuredArticles = [1, 2, 4].map((id) => {
+    const article = articles.find((item) => item.id === id)
+
+    return {
+        ...article,
+        ...articleThemes[id],
+        href: `/blog/${article.id}`,
+        initials: article.author.split(' ').map((part) => part[0]).join(''),
+        dateLabel: new Intl.DateTimeFormat('en', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        }).format(new Date(`${article.publishedAt}T00:00:00`)),
+    }
+})
 
 const Home = () => {
   return (
@@ -93,14 +42,14 @@ const Home = () => {
                 <h2>Featured Articles</h2>
                 <p>Deep, practical writing for the decisions developers face in production.</p>
             </div>
-            <a href="/blogs">View all articles <span aria-hidden="true">→</span></a>
+            <Link to="/blogs">View all articles <span aria-hidden="true">→</span></Link>
         </div>
         <div className="featured-articles__grid">
-            {featuredArticles.slice(0, 3).map((article) => (
+            {featuredArticles.map((article) => (
                 <article className="article-card" key={article.title}>
-                    <a
+                    <Link
                         className={`article-card__cover article-card__cover--${article.cover}`}
-                        href={article.href}
+                        to={article.href}
                         role="img"
                         aria-label={`${article.title} cover`}
                     >
@@ -113,25 +62,25 @@ const Home = () => {
                                 <span></span>
                             </div>
                         </div>
-                    </a>
+                    </Link>
                     <div className="article-card__content">
                         <div className="article-card__meta">
                             <span>{article.category}</span>
-                            <span>{article.readingTime}</span>
+                            <span>{article.readingTime} min read</span>
                         </div>
-                        <h3><a href={article.href}>{article.title}</a></h3>
+                        <h3><Link to={article.href}>{article.title}</Link></h3>
                         <p>{article.excerpt}</p>
                         <div className="article-card__footer">
                             <div className="article-card__author">
                                 <span>{article.initials}</span>
                                 <div>
                                     <strong>{article.author}</strong>
-                                    <time>{article.date}</time>
+                                    <time dateTime={article.publishedAt}>{article.dateLabel}</time>
                                 </div>
                             </div>
-                            <a className="article-card__button" href={article.href} aria-label={`Read ${article.title}`}>
+                            <Link className="article-card__button" to={article.href} aria-label={`Read ${article.title}`}>
                                 Read article <span aria-hidden="true">→</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </article>
@@ -237,7 +186,7 @@ const Home = () => {
                 </div>
             </div>
 
-            <form className="contact__form">
+            <form className="contact__form" onSubmit={(event) => event.preventDefault()}>
                 <div className="contact__fields">
                     <label>
                         <span>Name</span>
