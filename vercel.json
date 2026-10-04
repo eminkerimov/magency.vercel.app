@@ -1,0 +1,40 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/mockServiceWorker.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/work",
+      "destination": "/work/index.html"
+    },
+    {
+      "source": "/work/:slug",
+      "destination": "/work/:slug/index.html"
+    },
+    {
+      "source": "/blogs",
+      "destination": "/blogs/index.html"
+    },
+    {
+      "source": "/blog/:id",
+      "destination": "/blog/:id/index.html"
+    },
+    {
+      "source": "/categories",
+      "destination": "/categories/index.html"
+    }
+  ]
+}

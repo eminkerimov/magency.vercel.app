@@ -1,48 +1,23 @@
 @font-face {
-    font-family: "OpenSans";
-    font-weight: 200;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/OpenSans-Light.ttf") format("truetype"),
-  } 
+  font-family: "OpenSans";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/OpenSans-Light.ttf") format("truetype");
+}
 
-  @font-face {
-    font-family: "OpenSans";
-    font-weight: 400;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/OpenSans-Regular.ttf") format("truetype"),
-  } 
+@font-face {
+  font-family: "OpenSans";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/OpenSans-Regular.ttf") format("truetype");
+}
 
-  @font-face {
-    font-family: "OpenSans";
-    font-weight: 600;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/OpenSans-Semibold.ttf") format("truetype"),
-  } 
-
-  @font-face {
-    font-family: "Lobster-Regular";
-    font-weight: 400;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/Lobster-Regular.ttf") format("truetype"),
-  } 
-
-  @font-face {
-    font-family: "Cambria-italic";
-    font-weight: 400;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/Cambria-italic.ttf") format("truetype"),
-  } 
-
-  @font-face {
-    font-family: "Roboto";
-    font-weight: 500;
-    font-style: normal;
-    font-stretch: normal;
-    src:url("../fonts/Roboto-Medium.ttf") format("truetype"),
-  } 
- 
+@font-face {
+  font-family: "OpenSans";
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+  src: url("../fonts/OpenSans-Semibold.ttf") format("truetype");
+}

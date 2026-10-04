@@ -2,6 +2,10 @@
 	box-sizing: border-box;
 }
 
+html {
+	scroll-behavior: smooth;
+}
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -50,7 +54,8 @@ img {
 
 a{
 	color:black;
-	&:hover,&:visited,&active{
+	text-decoration: none;
+	&:hover,&:visited,&:active{
 		text-decoration: none;
 		color:inherit;
 	}
@@ -66,14 +71,85 @@ input[type=radio] {
 	appearance: none;
 }
 
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
+
 button {
 	border: none;
-	&:focus{
-		outline: none;
+	&:focus-visible{
+		outline: 3px solid rgba(97, 94, 216, .3);
+		outline-offset: 3px;
 	}
 }
+
+.container {
+	width: 100%;
+	max-width: 1140px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+.route-loading {
+	min-height: 70vh;
+	padding: 96px 0;
+	background: #f4f7fc;
+}
+
+.app-bootstrap {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 24px;
+	color: #dfe3f1;
+	background: radial-gradient(circle at 50% 30%, rgba(105, 98, 225, .24), transparent 30%), #101529;
+}
+
+.app-bootstrap__mark {
+	width: 48px;
+	height: 48px;
+	display: grid;
+	border-radius: 14px;
+	color: #fff;
+	background: linear-gradient(135deg, #6966e9, #7c4ed8);
+	box-shadow: 0 12px 30px rgba(100, 86, 223, .3);
+	font-size: 20px;
+	font-weight: 700;
+	place-items: center;
+}
+
+.app-bootstrap > div { display: grid; gap: 5px; }
+.app-bootstrap strong { font-size: 15px; }
+.app-bootstrap div span { color: #8f99b1; font-size: 12px; }
 
 .app {
 	width: 100%;
 	overflow-x: hidden;
+}
+
+@media (max-width: 1199px) {
+	.container { max-width: 960px; }
+}
+
+@media (max-width: 991px) {
+	.container { max-width: 720px; }
+}
+
+@media (max-width: 767px) {
+	.container { max-width: 540px; }
+}
+
+@media (max-width: 575px) {
+	.container { max-width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
 }

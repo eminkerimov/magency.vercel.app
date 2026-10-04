@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { articles } from "../data/data";
+import ContentState from "../components/ContentState";
+import Seo from "../components/Seo";
+import { useCategoriesQuery } from "../features/articles/queries";
 
 const categoryMeta = {
   Frontend: {
@@ -61,33 +63,26 @@ const formatDate = (date) =>
   }).format(new Date(`${date}T00:00:00`));
 
 const Categories = () => {
-  const categories = useMemo(() => {
-    const grouped = articles.reduce((acc, article) => {
-      if (!acc[article.category]) {
-        acc[article.category] = [];
-      }
-
-      acc[article.category].push(article);
-      return acc;
-    }, {});
-
-    return Object.entries(grouped).map(([name, categoryArticles]) => {
-      const sortedArticles = [...categoryArticles].sort(
-        (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
-      );
-
-      return {
-        name,
-        count: categoryArticles.length,
-        latestArticle: sortedArticles[0],
-        totalReadingTime: categoryArticles.reduce(
-          (sum, article) => sum + article.readingTime,
-          0
-        ),
-        ...categoryMeta[name],
-      };
-    });
-  }, []);
+  const {
+    data: categoryData,
+    error: categoriesError,
+    isError: isCategoriesError,
+    isPending: isCategoriesPending,
+    refetch: refetchCategories,
+  } = useCategoriesQuery();
+  const categories = useMemo(
+    () =>
+      (categoryData || []).map((category) => ({
+        icon: "#",
+        eyebrow: "Engineering",
+        color: "violet",
+        description: "Practical production notes for modern engineering teams.",
+        stack: [],
+        ...categoryMeta[category.name],
+        ...category,
+      })),
+    [categoryData]
+  );
 
   const featuredCategories = [...categories]
     .sort((a, b) => b.count - a.count)
@@ -95,21 +90,26 @@ const Categories = () => {
 
   return (
     <main className="categories-page">
+      <Seo
+        title="Engineering Topics | M-Agency"
+        description="Browse M-Agency engineering insights by frontend, backend, cloud, databases, testing, and leadership topics."
+        path="/categories"
+      />
       <section className="categories-hero">
         <div className="container">
           <div className="categories-hero__content">
-            <span className="categories-kicker">Engineering topics</span>
+            <span className="categories-kicker">M-Agency Insights</span>
 
-            <h1>Categories</h1>
+            <h1>Explore by Topic</h1>
 
             <p>
-              Production-focused collections for frontend, backend, cloud,
-              databases, testing, and engineering leadership.
+              Browse practical engineering articles across frontend, backend,
+              cloud, databases, testing, and technical leadership.
             </p>
 
             <div className="categories-hero__actions">
-              <a href="#category-grid">Browse categories</a>
-              <Link to="/blogs">View all articles</Link>
+              <a href="#category-grid">Browse topics</a>
+              <Link to="/blogs">View all insights</Link>
             </div>
           </div>
         </div>
@@ -129,6 +129,26 @@ const Categories = () => {
             </p>
           </div>
 
+          {isCategoriesPending ? (
+            <ContentState count={6} label="Loading engineering topics" />
+          ) : isCategoriesError ? (
+            <ContentState
+              status="error"
+              title="Topics are unavailable"
+              message={
+                categoriesError?.message ||
+                "The topic directory could not be loaded."
+              }
+              onRetry={() => refetchCategories()}
+            />
+          ) : categories.length === 0 ? (
+            <ContentState
+              status="empty"
+              eyebrow="Topics coming soon"
+              title="No collections yet"
+              message="Engineering collections will appear here when articles are published."
+            />
+          ) : (
           <div className="categories-grid">
             {categories.map((category, index) => (
               <article
@@ -177,9 +197,11 @@ const Categories = () => {
               </article>
             ))}
           </div>
+          )}
         </div>
       </section>
 
+      {!isCategoriesPending && !isCategoriesError && categories.length > 0 && (
       <section className="categories-featured">
         <div className="container">
           <div className="categories-featured__heading">
@@ -188,7 +210,7 @@ const Categories = () => {
               <h2>Most active collections</h2>
             </div>
 
-            <Link to="/blogs">Browse every article →</Link>
+            <Link to="/blogs">View all insights →</Link>
           </div>
 
           <div className="categories-featured__grid">
@@ -239,6 +261,7 @@ const Categories = () => {
           </div>
         </div>
       </section>
+      )}
 
       <section className="categories-cta">
         <div className="container">

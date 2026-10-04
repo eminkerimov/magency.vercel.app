@@ -1,6 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
-import { articles } from "../data/data";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Link,
+  useLocation,
+  useParams,
+} from "react-router-dom";
+import ContentState from "../components/ContentState";
+import NotFound from "../components/NotFound";
+import ReadingProgress from "../components/ReadingProgress";
+import Seo from "../components/Seo";
+import ArticleBody from "../features/articles/ArticleBody";
+import { useArticleQuery } from "../features/articles/queries";
+import BookmarkToggle from "../features/bookmarks/BookmarkToggle";
+import ArticleDiscussion from "../features/comments/ArticleDiscussion";
+import ArticleHelpfulness from "../features/helpfulness/ArticleHelpfulness";
+import { useReadingProgress } from "../features/readingProgress";
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -9,92 +22,335 @@ const formatDate = (date) =>
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
 
+const copyText = async (text, trigger) => {
+  let clipboardError;
+
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (error) {
+      clipboardError = error;
+    }
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.inset = "0 auto auto -9999px";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+
+  try {
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, text.length);
+
+    const copied = document.execCommand?.("copy");
+
+    if (!copied) {
+      throw clipboardError || new Error("Copy command was rejected");
+    }
+  } finally {
+    textarea.remove();
+    trigger?.focus({ preventScroll: true });
+  }
+};
+
 const InnerBlog = () => {
   const { id } = useParams();
-  const [readingProgress, setReadingProgress] = useState(0);
-  const [comment, setComment] = useState("");
-  const [commentSent, setCommentSent] = useState(false);
-
-  const articleIndex = articles.findIndex(
-    (item) => String(item.id) === String(id)
-  );
-
-  const article = articles[articleIndex];
+  const location = useLocation();
+  const articleBodyRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const lastRecordedStepRef = useRef(0);
+  const trackedArticleRef = useRef("");
+  const copyResetTimerRef = useRef(null);
+  const [copyState, setCopyState] = useState({
+    articleId: "",
+    status: "idle",
+  });
+  const {
+    data,
+    error,
+    isError,
+    isPending,
+    refetch,
+  } = useArticleQuery(id);
+  const article = data?.article;
+  const {
+    isComplete: isReadingComplete,
+    progress: savedReadingProgress,
+    markComplete,
+    recordProgress,
+  } = useReadingProgress(article?.id);
+  const previousArticle = data?.previousArticle;
+  const nextArticle = data?.nextArticle;
+  const relatedArticles = data?.relatedArticles || [];
+  const articleSections = article?.content?.sections || [];
+  const authorProfile = article?.authorProfile;
+  const insightsOrigin =
+    typeof location.state?.from === "string" &&
+    location.state.from.startsWith("/blogs")
+      ? location.state.from
+      : "";
+  const articleNavigationState = insightsOrigin
+    ? { from: insightsOrigin }
+    : undefined;
+  const copyStatus =
+    copyState.articleId === article?.id ? copyState.status : "idle";
 
   useEffect(() => {
-    setComment("");
-    setCommentSent(false);
-  }, [id]);
+    window.clearTimeout(copyResetTimerRef.current);
+    copyResetTimerRef.current = null;
 
-  const relatedArticles = useMemo(() => {
-    if (!article) return [];
-
-    const matchingArticles = articles.filter(
-      (item) =>
-        item.id !== article.id &&
-        (item.category === article.category ||
-          item.tags?.some((tag) => article.tags?.includes(tag)))
-    );
-
-    const fallbackArticles = articles.filter(
-      (item) =>
-        item.id !== article.id &&
-        !matchingArticles.some((match) => match.id === item.id)
-    );
-
-    return [...matchingArticles, ...fallbackArticles].slice(0, 3);
-  }, [article]);
+    return () => {
+      window.clearTimeout(copyResetTimerRef.current);
+    };
+  }, [article?.id]);
 
   useEffect(() => {
+    const articleId = article?.id ? String(article.id) : "";
+
+    if (trackedArticleRef.current !== articleId) {
+      trackedArticleRef.current = articleId;
+      lastRecordedStepRef.current = savedReadingProgress;
+      return;
+    }
+
+    lastRecordedStepRef.current = Math.max(
+      lastRecordedStepRef.current,
+      savedReadingProgress
+    );
+  }, [article?.id, savedReadingProgress]);
+
+  useEffect(() => {
+    if (!article?.id || !articleBodyRef.current) return undefined;
+
+    let animationFrame = 0;
+
     const updateProgress = () => {
-      const scrollTop =
-        window.scrollY || document.documentElement.scrollTop;
-      const scrollHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
+      if (animationFrame) return;
 
-      setReadingProgress(
-        scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0
-      );
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0;
+        const articleBody = articleBodyRef.current;
+
+        if (!articleBody) return;
+
+        const scrollTop =
+          window.scrollY || document.documentElement.scrollTop;
+        const articleTop =
+          scrollTop + articleBody.getBoundingClientRect().top;
+        const readingPosition =
+          scrollTop + window.innerHeight * 0.35;
+        const articleHeight = Math.max(articleBody.offsetHeight, 1);
+        const rawProgress =
+          ((readingPosition - articleTop) / articleHeight) * 100;
+        const nextProgress = Math.min(
+          Math.max(rawProgress, 0),
+          100
+        );
+        const visualProgress = nextProgress >= 95 ? 100 : nextProgress;
+
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width =
+            visualProgress.toFixed(2) + "%";
+        }
+
+        const nextStep =
+          nextProgress >= 95
+            ? 100
+            : nextProgress >= 5
+              ? Math.floor(nextProgress / 5) * 5
+              : 0;
+
+        if (nextStep <= lastRecordedStepRef.current) return;
+
+        lastRecordedStepRef.current = nextStep;
+
+        if (nextStep === 100) {
+          markComplete();
+        } else {
+          recordProgress(nextStep);
+        }
+      });
     };
 
     updateProgress();
     window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
 
-    return () => window.removeEventListener("scroll", updateProgress);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, [article?.id, markComplete, recordProgress]);
 
-  if (!article) {
-    return <Navigate to="/blogs" replace />;
+  if (isPending) {
+    return (
+      <main className="article-page">
+        <Seo
+          title="Engineering Insight | M-Agency"
+          description="Loading an M-Agency engineering insight."
+          path={`/blog/${id}`}
+        />
+        <section className="article-content">
+          <div className="container">
+            <ContentState
+              status="loading"
+              count={3}
+              label="Loading article"
+            />
+          </div>
+        </section>
+      </main>
+    );
   }
 
-  const previousArticle =
-    articleIndex > 0 ? articles[articleIndex - 1] : null;
-  const nextArticle =
-    articleIndex < articles.length - 1
-      ? articles[articleIndex + 1]
-      : null;
+  if (isError && error?.status !== 404) {
+    return (
+      <main className="article-page">
+        <Seo
+          title="Engineering Insight | M-Agency"
+          description="An M-Agency engineering insight."
+          path={`/blog/${id}`}
+        />
+        <section className="article-content">
+          <div className="container">
+            <ContentState
+              status="error"
+              title="This article could not be loaded"
+              message={error?.message}
+              onRetry={refetch}
+            />
+          </div>
+        </section>
+      </main>
+    );
+  }
 
-  const handleComment = (event) => {
-    event.preventDefault();
+  if (!article) {
+    return (
+      <NotFound
+        eyebrow="Insight not found"
+        title="That article is no longer in the library."
+        message="The address may be outdated. Browse the current Insights collection to continue reading."
+      />
+    );
+  }
 
-    if (!comment.trim()) return;
+  const handleResumeReading = () => {
+    const articleBody = articleBodyRef.current;
 
-    setCommentSent(true);
-    setComment("");
+    if (!articleBody) return;
+
+    const targetProgress = Math.min(savedReadingProgress, 92);
+    const articleTop =
+      window.scrollY + articleBody.getBoundingClientRect().top;
+    const targetPosition =
+      articleTop +
+      articleBody.offsetHeight * (targetProgress / 100) -
+      window.innerHeight * 0.35;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    window.scrollTo({
+      top: Math.max(targetPosition, 0),
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+
+    const sections = [...articleBody.querySelectorAll("section")];
+    const targetOffset =
+      articleBody.offsetHeight * (targetProgress / 100);
+    const articleBodyTop =
+      articleBody.getBoundingClientRect().top;
+    const targetSection =
+      sections
+        .filter(
+          (section) =>
+            section.getBoundingClientRect().top - articleBodyTop <=
+            targetOffset
+        )
+        .at(-1) || sections[0];
+    const focusTarget =
+      targetSection?.querySelector("h2, p") || articleBody;
+    const moveFocus = () => {
+      focusTarget.setAttribute("tabindex", "-1");
+      focusTarget.focus({ preventScroll: true });
+    };
+
+    if (prefersReducedMotion) {
+      window.requestAnimationFrame(moveFocus);
+    } else {
+      window.setTimeout(moveFocus, 450);
+    }
+  };
+
+  const shareUrl = `${window.location.origin}${location.pathname}`;
+  const copyButtonLabel =
+    copyStatus === "copying"
+      ? "Copying..."
+      : copyStatus === "success"
+        ? "Copied"
+        : copyStatus === "error"
+          ? "Try again"
+          : "Copy link";
+  const copyStatusMessage =
+    copyStatus === "success"
+      ? "Link copied to clipboard."
+      : copyStatus === "error"
+        ? "Could not copy the link. Try again or use the address bar."
+        : "";
+
+  const handleCopyLink = async (event) => {
+    if (copyStatus === "copying") return;
+
+    const trigger = event.currentTarget;
+    window.clearTimeout(copyResetTimerRef.current);
+    setCopyState({ articleId: article.id, status: "copying" });
+
+    try {
+      await copyText(shareUrl, trigger);
+      setCopyState({ articleId: article.id, status: "success" });
+      copyResetTimerRef.current = window.setTimeout(
+        () => setCopyState({ articleId: article.id, status: "idle" }),
+        2600
+      );
+    } catch {
+      setCopyState({ articleId: article.id, status: "error" });
+      copyResetTimerRef.current = window.setTimeout(
+        () => setCopyState({ articleId: article.id, status: "idle" }),
+        5000
+      );
+    }
   };
 
   return (
     <main className="article-page">
+      <Seo
+        title={`${article.title} | M-Agency`}
+        description={article.excerpt}
+        path={`/blog/${article.id}`}
+        image={article.image}
+        type="article"
+      />
       <div
         className="article-progress"
-        style={{ width: `${readingProgress}%` }}
+        ref={progressBarRef}
+        style={{ width: "0%" }}
         aria-hidden="true"
       />
 
       <section className="article-hero">
         <div className="container">
-          <Link className="article-hero__back" to="/blogs">
-            ← Back to articles
+          <Link
+            className="article-hero__back"
+            to={insightsOrigin || "/blogs"}
+          >
+            ← Back to insights
           </Link>
 
           <div className="article-hero__content">
@@ -108,7 +364,7 @@ const InnerBlog = () => {
             <div className="article-hero__meta">
               <div>
                 <strong>{article.author}</strong>
-                <span>Engineering author</span>
+                <span>{authorProfile?.role || "Engineering author"}</span>
               </div>
 
               <time dateTime={article.publishedAt}>
@@ -117,6 +373,43 @@ const InnerBlog = () => {
 
               <span>{article.readingTime} min read</span>
               <span>{article.commentCount} comments</span>
+            </div>
+
+            <div className="article-hero__library">
+              <BookmarkToggle article={article} variant="hero" />
+
+              {savedReadingProgress > 0 &&
+                (isReadingComplete ? (
+                  <div className="article-hero__resume">
+                    <ReadingProgress
+                      articleTitle={article.title}
+                      compact
+                      progress={savedReadingProgress}
+                    />
+                  </div>
+                ) : (
+                  <div className="article-hero__resume">
+                    <button
+                      className="article-hero__resume-action"
+                      type="button"
+                      aria-label={
+                        "Resume " +
+                        article.title +
+                        " from " +
+                        savedReadingProgress +
+                        " percent"
+                      }
+                      onClick={handleResumeReading}
+                    >
+                      Resume reading
+                    </button>
+                    <ReadingProgress
+                      articleTitle={article.title}
+                      compact
+                      progress={savedReadingProgress}
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         </div>
@@ -133,124 +426,33 @@ const InnerBlog = () => {
           <aside className="article-toc">
             <span>On this page</span>
             <nav>
-              <a href="#overview">Overview</a>
-              <a href="#architecture">Architecture decisions</a>
-              <a href="#implementation">Implementation</a>
-              <a href="#observability">Observability</a>
-              <a href="#conclusion">Conclusion</a>
+              {articleSections.map((section) => (
+                <a href={`#${section.id}`} key={section.id}>
+                  {section.label || section.title}
+                </a>
+              ))}
             </nav>
           </aside>
 
-          <article className="article-body">
-            <section id="overview">
-              <p className="article-body__lead">
-                Production software fails in ways that are rarely visible in
-                small demos. A useful engineering approach starts by separating
-                expected failure states from unexpected faults and deciding
-                exactly where recovery belongs.
-              </p>
+          <ArticleBody ref={articleBodyRef} sections={articleSections} />
 
-              <p>
-                The goal is not to eliminate every error. The goal is to contain
-                impact, preserve useful context, and give both users and
-                engineers enough information to recover quickly.
-              </p>
-            </section>
-
-            <section id="architecture">
-              <h2>Architecture decisions should follow product boundaries</h2>
-
-              <p>
-                Technical boundaries work best when they match meaningful user
-                tasks. A dashboard widget, editor, billing panel, or search
-                result area can often fail independently without replacing the
-                entire application.
-              </p>
-
-              <blockquote>
-                Recovery UI is part of the product experience, not a fallback
-                added after implementation.
-              </blockquote>
-
-              <p>
-                Keep server state, local interaction state, route state, and
-                long-lived application state separate. This makes failures
-                easier to reason about and prevents a single dependency from
-                controlling unrelated areas of the interface.
-              </p>
-            </section>
-
-            <section id="implementation">
-              <h2>Make failure paths explicit in the implementation</h2>
-
-              <p>
-                Error handling becomes easier to maintain when each layer has a
-                clear responsibility. Components render states, services
-                normalize external responses, and monitoring captures enough
-                context to explain what happened.
-              </p>
-
-              <pre>
-                <code>{`async function loadArticle(id) {
-  const response = await fetch(\`/api/articles/\${id}\`);
-
-  if (!response.ok) {
-    throw new Error("Article request failed");
-  }
-
-  return response.json();
-}`}</code>
-              </pre>
-
-              <p>
-                Avoid hiding failures behind generic catch blocks. Handle known
-                states directly and reserve unexpected errors for boundaries
-                that can report and isolate them.
-              </p>
-            </section>
-
-            <section id="observability">
-              <h2>Observability must explain impact, not only errors</h2>
-
-              <p>
-                Useful reports include route, release version, affected feature,
-                correlation identifier, and the boundary that handled the
-                failure. Do not collect private user data unless it is strictly
-                necessary.
-              </p>
-
-              <ul>
-                <li>Track failure frequency by feature and release.</li>
-                <li>Measure successful recovery after retry actions.</li>
-                <li>Connect client errors with backend traces.</li>
-                <li>Review recurring fallbacks as product defects.</li>
-              </ul>
-            </section>
-
-            <section id="conclusion">
-              <h2>Conclusion</h2>
-
-              <p>
-                Reliable interfaces are designed around containment, recovery,
-                and visibility. When these decisions are made early, the
-                application stays useful during failure and the engineering
-                team receives actionable signals instead of vague reports.
-              </p>
-            </section>
-          </article>
-
-          <aside className="article-share">
-            <span>Share</span>
+          <aside
+            className="article-share"
+            aria-labelledby="article-share-title"
+          >
+            <h2 id="article-share-title">Share</h2>
             <button
               type="button"
-              onClick={() => navigator.clipboard?.writeText(window.location.href)}
+              onClick={handleCopyLink}
+              aria-disabled={copyStatus === "copying"}
+              aria-busy={copyStatus === "copying"}
             >
-              Copy link
+              {copyButtonLabel}
             </button>
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                 article.title
-              )}&url=${encodeURIComponent(window.location.href)}`}
+              )}&url=${encodeURIComponent(shareUrl)}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -258,18 +460,31 @@ const InnerBlog = () => {
             </a>
             <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                window.location.href
+                shareUrl
               )}`}
               target="_blank"
               rel="noreferrer"
             >
               LinkedIn
             </a>
+            <p
+              className="article-share__status"
+              data-state={copyStatus}
+              role="status"
+              aria-live="polite"
+            >
+              {copyStatusMessage}
+            </p>
           </aside>
         </div>
 
         <div className="container article-content__end">
           <div className="article-content__end-inner">
+            <ArticleHelpfulness
+              key={article.id}
+              articleId={article.id}
+            />
+
             <div className="article-tags">
               {article.tags?.map((tag) => (
                 <Link key={tag} to={`/blogs?q=${encodeURIComponent(tag)}`}>
@@ -287,35 +502,16 @@ const InnerBlog = () => {
               </div>
 
               <div>
-                <span>Written by</span>
+                <span>{authorProfile?.role || "Engineering author"}</span>
                 <h2>{article.author}</h2>
                 <p>
-                  Engineering author focused on production architecture,
-                  reliability, and practical frontend systems.
+                  {authorProfile?.bio ||
+                    "Shares practical perspectives on building and maintaining modern software."}
                 </p>
               </div>
             </div>
 
-            <form className="article-comment" onSubmit={handleComment}>
-              <div>
-                <span>Discussion</span>
-                <h2>Leave a comment</h2>
-              </div>
-
-              <textarea
-                value={comment}
-                onChange={(event) => setComment(event.target.value)}
-                placeholder="Share a useful technical observation..."
-                rows="5"
-                required
-              />
-
-              <button type="submit">Post comment</button>
-
-              {commentSent && (
-                <small>Your comment was added to the demo state.</small>
-              )}
-            </form>
+            <ArticleDiscussion key={article.id} article={article} />
           </div>
         </div>
       </section>
@@ -323,7 +519,10 @@ const InnerBlog = () => {
       <section className="article-navigation">
         <div className="container">
           {previousArticle ? (
-            <Link to={`/blog/${previousArticle.id}`}>
+            <Link
+              state={articleNavigationState}
+              to={`/blog/${previousArticle.id}`}
+            >
               <span>Previous article</span>
               <strong>{previousArticle.title}</strong>
             </Link>
@@ -332,7 +531,10 @@ const InnerBlog = () => {
           )}
 
           {nextArticle ? (
-            <Link to={`/blog/${nextArticle.id}`}>
+            <Link
+              state={articleNavigationState}
+              to={`/blog/${nextArticle.id}`}
+            >
               <span>Next article</span>
               <strong>{nextArticle.title}</strong>
             </Link>
@@ -347,20 +549,28 @@ const InnerBlog = () => {
           <div className="container">
             <div className="article-related__heading">
               <span>Continue reading</span>
-              <h2>Related articles</h2>
+              <h2>Related insights</h2>
             </div>
 
             <div className="article-related__grid">
               {relatedArticles.map((item) => (
                 <article key={item.id}>
-                  <Link to={`/blog/${item.id}`}>
+                  <Link
+                    state={articleNavigationState}
+                    to={`/blog/${item.id}`}
+                  >
                     <img src={item.image} alt={item.title} loading="lazy" />
                   </Link>
 
                   <div>
                     <span>{item.category}</span>
                     <h3>
-                      <Link to={`/blog/${item.id}`}>{item.title}</Link>
+                      <Link
+                        state={articleNavigationState}
+                        to={`/blog/${item.id}`}
+                      >
+                        {item.title}
+                      </Link>
                     </h3>
                     <p>{item.excerpt}</p>
                   </div>

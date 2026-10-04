@@ -11,27 +11,27 @@ const MainSlider = () => {
           <div className="hero__content">
             <span className="hero__badge">
               <span aria-hidden="true"></span>
-              Developer Blog
+              Software Product Agency
             </span>
             <h1>
-              Build better software with <span>ideas that ship.</span>
+              We design and build <span>software that delivers.</span>
             </h1>
             <p>
-              Practical engineering guides, architecture deep dives, and
-              production lessons for developers building modern products.
+              M-Agency helps ambitious teams turn complex ideas into clear,
+              reliable digital products—from interface to infrastructure.
             </p>
             <div className="hero__actions">
-              <Link className="hero__button hero__button--primary" to="/blogs">
-                Start Reading
+              <Link className="hero__button hero__button--primary" to="/#contact">
+                Start a project
                 <span aria-hidden="true">→</span>
               </Link>
-              <Link className="hero__button hero__button--secondary" to="/#portfolio">
-                Explore Articles
+              <Link className="hero__button hero__button--secondary" to="/#services">
+                Explore services
               </Link>
             </div>
           </div>
 
-          <div className="hero-visual" aria-label="Developer article publishing dashboard mockup">
+          <div className="hero-visual" role="img" aria-label="Digital product delivery dashboard mockup">
             <div className="hero-visual__glow" aria-hidden="true"></div>
             <div className="hero-code-card">
               <div className="hero-code-card__header">
@@ -40,43 +40,43 @@ const MainSlider = () => {
                   <span></span>
                   <span></span>
                 </div>
-                <span>article.tsx</span>
-                <span className="hero-code-card__status">Live</span>
+                <span>product.tsx</span>
+                <span className="hero-code-card__status">Shipping</span>
               </div>
               <div className="hero-code-card__body">
                 <span className="code-line">
-                  <span className="code-keyword">const</span> article = <span className="code-keyword">await</span> publish({"{"}
+                  <span className="code-keyword">const</span> product = <span className="code-keyword">await</span> build({"{"}
                 </span>
                 <span className="code-line code-line--indent">
-                  topic: <span className="code-string">&quot;React architecture&quot;</span>,
+                  experience: <span className="code-string">&quot;focused&quot;</span>,
                 </span>
                 <span className="code-line code-line--indent">
-                  depth: <span className="code-string">&quot;production&quot;</span>,
+                  foundation: <span className="code-string">&quot;scalable&quot;</span>,
                 </span>
                 <span className="code-line">{"}"});</span>
                 <span className="code-line code-line--empty">&nbsp;</span>
                 <span className="code-line">
-                  <span className="code-keyword">return</span> <span className="code-tag">&lt;ArticleCard</span>
+                  <span className="code-keyword">return</span> <span className="code-tag">&lt;Product</span>
                 </span>
                 <span className="code-line code-line--indent">
-                  article={"{"}article{"}"} <span className="code-tag">/&gt;</span>;
+                  ready <span className="code-tag">/&gt;</span>;
                 </span>
               </div>
               <div className="hero-code-card__footer">
                 <div>
-                  <span>Editorial score</span>
+                  <span>Delivery standard</span>
                   <strong>Production-ready</strong>
                 </div>
-                <span className="hero-code-card__published">Published</span>
+                <span className="hero-code-card__published">Shipped</span>
               </div>
             </div>
 
             <div className="hero-metric-card">
               <div className="hero-metric-card__top">
-                <span>Weekly readers</span>
-                <strong>+12.8%</strong>
+                <span>Product quality</span>
+                <strong>Measured</strong>
               </div>
-              <b>24.8K</b>
+              <b>Ready</b>
               <div className="hero-metric-card__bars" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>
               </div>
@@ -85,8 +85,8 @@ const MainSlider = () => {
             <div className="hero-topic-card">
               <span className="hero-topic-card__icon" aria-hidden="true">&lt;/&gt;</span>
               <div>
-                <span>Trending topic</span>
-                <strong>System Design</strong>
+                <span>Core capability</span>
+                <strong>Product Engineering</strong>
               </div>
             </div>
           </div>

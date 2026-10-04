@@ -1,27 +1,47 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
-const Footer = () => {
-  return (
-    <footer>
+const footerNavigation = [
+  ["Services", "/#services"],
+  ["Work", "/work"],
+  ["Insights", "/blogs"],
+  ["Topics", "/categories"],
+  ["Contact", "/#contact"],
+];
+
+const Footer = () => (
+  <footer className="site-footer">
     <div className="container">
-        <div className="row">
-            <div className="col-12">
-                <ul className="footer-nav">
-                    <li><Link to="/blogs">Articles</Link></li>
-                    <li><Link to="/categories">Categories</Link></li>
-                    <li><Link to="/#contact">Contact</Link></li>
-                </ul>
-            </div>
-            <div className="col-12">
-                <div className="footer-copyright">
-                    <p>Copyright © 2026 M-Agency. Practical knowledge for developers.</p>
-                </div>
-            </div>
+      <div className="site-footer__top">
+        <div className="site-footer__brand">
+          <Link className="site-footer__logo" to="/" aria-label="M-Agency home">
+            <span aria-hidden="true">M</span>
+            M-Agency
+          </Link>
+          <p>Senior frontend engineering for clear, dependable digital products.</p>
         </div>
-    </div>
-</footer>
-  )
-}
 
-export default Footer
+        <nav aria-label="Footer navigation">
+          <span>Explore</span>
+          <ul className="site-footer__nav">
+            {footerNavigation.map(([label, href]) => (
+              <li key={label}><Link to={href}>{label}</Link></li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="site-footer__project">
+          <span>Have a product challenge?</span>
+          <p>Share the context and find the right starting point.</p>
+          <Link to="/#contact">Start a project <span aria-hidden="true">&#8599;</span></Link>
+        </div>
+      </div>
+
+      <div className="site-footer__bottom">
+        <p>&copy; {new Date().getFullYear()} M-Agency.</p>
+        <span>Frontend portfolio / Built with React and Vite</span>
+      </div>
+    </div>
+  </footer>
+);
+
+export default Footer;

@@ -1,15 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { articleCategories, articles } from "../data/data";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { subscribeToNewsletter } from "../api/forms";
+import ContentState from "../components/ContentState";
+import ReadingProgress from "../components/ReadingProgress";
+import Seo from "../components/Seo";
+import { useArticlesQuery } from "../features/articles/queries";
+import BookmarkToggle from "../features/bookmarks/BookmarkToggle";
+import { useBookmarksQuery } from "../features/bookmarks/queries";
+import { useReadingProgressSummaries } from "../features/readingProgress";
 
 const ITEMS_PER_PAGE = 8;
-const NORMALIZED_CATEGORIES = [
-  "All categories",
-  ...articleCategories.filter(
-    (item) => item !== "All" && item !== "All categories"
-  ),
-];
+const ALL_CATEGORIES = "All categories";
 const SORT_OPTIONS = ["newest", "oldest", "popular", "readingTime", "title"];
+const EMPTY_ARTICLES = [];
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -19,21 +22,88 @@ const formatDate = (date) =>
   }).format(new Date(`${date}T00:00:00`));
 
 const Blog = () => {
+  const {
+    data: articlesData,
+    error: articlesError,
+    isError: isArticlesError,
+    isPending: isArticlesPending,
+    refetch: refetchArticles,
+  } = useArticlesQuery();
+  const {
+    data: bookmarks = [],
+    error: bookmarksError,
+    isError: isBookmarksError,
+    isPending: isBookmarksPending,
+    refetch: refetchBookmarks,
+  } = useBookmarksQuery();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState(() => searchParams.get("q") || "");
-  const [category, setCategory] = useState(() => {
-    const initialCategory = searchParams.get("category");
-    return NORMALIZED_CATEGORIES.includes(initialCategory)
-      ? initialCategory
-      : "All categories";
-  });
-  const [sortBy, setSortBy] = useState(() => {
-    const initialSort = searchParams.get("sort");
-    return SORT_OPTIONS.includes(initialSort) ? initialSort : "newest";
-  });
-  const [page, setPage] = useState(1);
+  const query = searchParams.get("q") || "";
+  const category = searchParams.get("category") || ALL_CATEGORIES;
+  const requestedSort = searchParams.get("sort");
+  const sortBy = SORT_OPTIONS.includes(requestedSort)
+    ? requestedSort
+    : "newest";
+  const requestedPage = Number(searchParams.get("page"));
+  const page =
+    Number.isInteger(requestedPage) && requestedPage > 0
+      ? requestedPage
+      : 1;
+  const savedOnly = searchParams.get("saved") === "1";
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [libraryAnnouncement, setLibraryAnnouncement] = useState("");
+  const [subscriptionState, setSubscriptionState] = useState({
+    status: "idle",
+    message: "",
+  });
+  const removalFocusRef = useRef(null);
+  const resultsRef = useRef(null);
+  const articles = Array.isArray(articlesData)
+    ? articlesData
+    : EMPTY_ARTICLES;
+  const bookmarkedArticleIds = useMemo(
+    () => new Set(bookmarks.map((bookmark) => bookmark.articleId)),
+    [bookmarks]
+  );
+  const articleIds = useMemo(
+    () => articles.map((article) => article.id),
+    [articles]
+  );
+  const progressByArticleId = useReadingProgressSummaries(articleIds);
+  const isSavedViewPending = savedOnly && isBookmarksPending;
+  const isSavedViewError = savedOnly && isBookmarksError;
+  const normalizedCategories = useMemo(
+    () => [
+      ALL_CATEGORIES,
+      ...new Set(
+        articles
+          .map((article) => article.category)
+          .filter((item) => typeof item === "string" && item.trim())
+      ),
+    ],
+    [articles]
+  );
+  const activeCategory = normalizedCategories.includes(category)
+    ? category
+    : ALL_CATEGORIES;
+  const articleLinkState = {
+    from: location.pathname + location.search,
+  };
+
+  const updateFilters = (updates) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, String(value));
+      }
+    });
+
+    nextParams.delete("page");
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const filteredArticles = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -41,7 +111,10 @@ const Blog = () => {
     return [...articles]
       .filter((article) => {
         const matchesCategory =
-          category === "All categories" || article.category === category;
+          activeCategory === ALL_CATEGORIES ||
+          article.category === activeCategory;
+        const matchesSaved =
+          !savedOnly || bookmarkedArticleIds.has(article.id);
 
         const searchable = [
           article.title,
@@ -53,7 +126,11 @@ const Blog = () => {
           .join(" ")
           .toLowerCase();
 
-        return matchesCategory && searchable.includes(normalizedQuery);
+        return (
+          matchesCategory &&
+          matchesSaved &&
+          searchable.includes(normalizedQuery)
+        );
       })
       .sort((a, b) => {
         if (sortBy === "popular") {
@@ -74,53 +151,75 @@ const Blog = () => {
 
         return new Date(b.publishedAt) - new Date(a.publishedAt);
       });
-  }, [category, query, sortBy]);
+  }, [
+    activeCategory,
+    articles,
+    bookmarkedArticleIds,
+    query,
+    savedOnly,
+    sortBy,
+  ]);
 
   const totalPages = Math.max(
     1,
     Math.ceil(filteredArticles.length / ITEMS_PER_PAGE)
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [query, category, sortBy]);
-
-  useEffect(() => {
-    const nextParams = new URLSearchParams();
-
-    if (query.trim()) nextParams.set("q", query.trim());
-    if (category !== "All categories") nextParams.set("category", category);
-    if (sortBy !== "newest") nextParams.set("sort", sortBy);
-
-    setSearchParams(nextParams, { replace: true });
-  }, [query, category, sortBy, setSearchParams]);
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
+  const currentPage = Math.min(page, totalPages);
 
   const visibleArticles = filteredArticles.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   const firstVisibleIndex = filteredArticles.length
-    ? (page - 1) * ITEMS_PER_PAGE + 1
+    ? (currentPage - 1) * ITEMS_PER_PAGE + 1
     : 0;
 
   const lastVisibleIndex = Math.min(
-    page * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
     filteredArticles.length
   );
+
+  const handleSavedBookmarkRemoval = (article) => {
+    if (!savedOnly) return;
+
+    removalFocusRef.current = {
+      index: visibleArticles.findIndex((item) => item.id === article.id),
+      title: article.title,
+    };
+  };
+
+  useEffect(() => {
+    const pendingRemoval = removalFocusRef.current;
+
+    if (!pendingRemoval || !savedOnly) return;
+
+    removalFocusRef.current = null;
+    window.requestAnimationFrame(() => {
+      const bookmarkButtons = [
+        ...document.querySelectorAll(
+          ".articles-card .bookmark-button"
+        ),
+      ];
+      const nextIndex = Math.min(
+        Math.max(pendingRemoval.index, 0),
+        Math.max(bookmarkButtons.length - 1, 0)
+      );
+      const nextTarget = bookmarkButtons[nextIndex] || resultsRef.current;
+
+      nextTarget?.focus();
+      setLibraryAnnouncement(
+        `Removed ${pendingRemoval.title} from saved articles. ${filteredArticles.length} saved article${filteredArticles.length === 1 ? "" : "s"} remaining.`
+      );
+    });
+  }, [filteredArticles.length, savedOnly, visibleArticles]);
 
   const popularArticle = useMemo(
     () =>
       [...articles].sort(
         (a, b) => b.commentCount - a.commentCount
       )[0],
-    []
+    [articles]
   );
 
   const recentArticles = useMemo(
@@ -131,7 +230,7 @@ const Blog = () => {
             new Date(b.publishedAt) - new Date(a.publishedAt)
         )
         .slice(0, 4),
-    []
+    [articles]
   );
 
   const popularTags = useMemo(() => {
@@ -151,10 +250,10 @@ const Blog = () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
       .map(([tag]) => tag);
-  }, []);
+  }, [articles]);
 
   const getCategoryCount = (item) => {
-    if (item === "All categories") {
+    if (item === ALL_CATEGORIES) {
       return articles.length;
     }
 
@@ -164,42 +263,97 @@ const Blog = () => {
   };
 
   const resetFilters = () => {
-    setQuery("");
-    setCategory("All categories");
-    setSortBy("newest");
+    setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   const changePage = (nextPage) => {
-    setPage(nextPage);
+    const normalizedPage = Math.min(
+      Math.max(nextPage, 1),
+      totalPages
+    );
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (normalizedPage === 1) {
+      nextParams.delete("page");
+    } else {
+      nextParams.set("page", String(normalizedPage));
+    }
+
+    setSearchParams(nextParams, { replace: true });
     requestAnimationFrame(() => {
-      document.querySelector(".articles-results")?.scrollIntoView({
-        behavior: "smooth",
+      const results = resultsRef.current;
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      results?.focus({ preventScroll: true });
+      results?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
         block: "start",
       });
     });
   };
 
-  const handleSubscribe = (event) => {
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+
+    if (subscriptionState.status !== "idle") {
+      setSubscriptionState({ status: "idle", message: "" });
+    }
+  };
+
+  const handleSubscribe = async (event) => {
     event.preventDefault();
 
-    if (!email.trim()) {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail || subscriptionState.status === "submitting") {
       return;
     }
 
-    setSubscribed(true);
-    setEmail("");
+    setSubscriptionState({ status: "submitting", message: "" });
+
+    try {
+      await subscribeToNewsletter(normalizedEmail);
+      setEmail("");
+      setSubscriptionState({
+        status: "success",
+        message: "You’re on the list. Watch your inbox for the next issue.",
+      });
+    } catch (error) {
+      if (error?.status === 409 || error?.code === "ALREADY_SUBSCRIBED") {
+        setEmail("");
+        setSubscriptionState({
+          status: "success",
+          message: "This email is already on the list.",
+        });
+        return;
+      }
+
+      setSubscriptionState({
+        status: "error",
+        message:
+          error?.message ||
+          "We couldn’t complete the subscription. Please try again.",
+      });
+    }
   };
 
   return (
     <main className="articles-page">
+      <Seo
+        title="Engineering Insights | M-Agency"
+        description="Practical articles on frontend, backend, cloud, databases, testing, and technical leadership."
+        path="/blogs"
+      />
       <section className="articles-hero">
         <div className="container">
           <div className="articles-hero__content">
-            <span>Engineering knowledge</span>
-            <h1>Articles</h1>
+            <span>M-Agency Insights</span>
+            <h1>Insights</h1>
             <p>
-              Production-focused guides for frontend, backend, cloud,
-              databases, testing, and engineering leadership.
+              Practical engineering perspectives on frontend, backend, cloud,
+              databases, testing, and technical leadership.
             </p>
           </div>
         </div>
@@ -207,23 +361,83 @@ const Blog = () => {
 
       <section className="articles-content">
         <div className="container">
-          <div className="articles-toolbar">
+          {isArticlesPending || isSavedViewPending ? (
+            <ContentState
+              status="loading"
+              count={8}
+              label={savedOnly ? "Loading saved insights" : "Loading insights"}
+            />
+          ) : isArticlesError || isSavedViewError ? (
+            <ContentState
+              status="error"
+              title={
+                isSavedViewError
+                  ? "Saved insights are temporarily unavailable"
+                  : "Insights are temporarily unavailable"
+              }
+              message={
+                (isSavedViewError
+                  ? bookmarksError?.message
+                  : articlesError?.message) ||
+                "The articles request could not be completed."
+              }
+              onRetry={() => {
+                if (isArticlesError) refetchArticles();
+                if (isSavedViewError) refetchBookmarks();
+              }}
+            />
+          ) : articles.length === 0 ? (
+            <ContentState
+              status="empty"
+              eyebrow="No published articles"
+              title="Insights are being prepared"
+              message="New engineering articles will appear here when they are published."
+            />
+          ) : (
+            <>
+          <p className="sr-only" aria-live="polite">
+            {libraryAnnouncement}
+          </p>
+
+          {isBookmarksError && !savedOnly && (
+            <div
+              className="articles-library-status"
+              id="saved-articles-status"
+              role="alert"
+            >
+              <span>Saved articles are temporarily unavailable.</span>
+              <button type="button" onClick={() => refetchBookmarks()}>
+                Try again
+              </button>
+            </div>
+          )}
+
+          <div className="articles-toolbar articles-toolbar--library">
             <label className="articles-toolbar__search">
               <span className="sr-only">Search articles</span>
               <input
                 type="search"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  updateFilters({ q: event.target.value });
+                }}
                 placeholder="Search by title, author, or topic"
               />
             </label>
 
             <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
+              value={activeCategory}
+              onChange={(event) => {
+                updateFilters({
+                  category:
+                    event.target.value === ALL_CATEGORIES
+                      ? null
+                      : event.target.value,
+                });
+              }}
               aria-label="Filter by category"
             >
-              {NORMALIZED_CATEGORIES.map((item) => (
+              {normalizedCategories.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -232,7 +446,14 @@ const Blog = () => {
 
             <select
               value={sortBy}
-              onChange={(event) => setSortBy(event.target.value)}
+              onChange={(event) => {
+                updateFilters({
+                  sort:
+                    event.target.value === "newest"
+                      ? null
+                      : event.target.value,
+                });
+              }}
               aria-label="Sort articles"
             >
               <option value="newest">Newest first</option>
@@ -241,19 +462,55 @@ const Blog = () => {
               <option value="readingTime">Shortest read</option>
               <option value="title">Title A–Z</option>
             </select>
+
+            <button
+              className={
+                "articles-toolbar__saved" + (savedOnly ? " is-active" : "")
+              }
+              type="button"
+              aria-pressed={savedOnly}
+              aria-describedby={
+                isBookmarksError ? "saved-articles-status" : undefined
+              }
+              disabled={isBookmarksPending || isBookmarksError}
+              onClick={() => {
+                updateFilters({ saved: savedOnly ? null : "1" });
+              }}
+            >
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M6.75 4.75c0-.97.78-1.75 1.75-1.75h7c.97 0 1.75.78 1.75 1.75v15.1L12 16.63l-5.25 3.22V4.75Z"
+                  fill={savedOnly ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.7"
+                />
+              </svg>
+              Saved {bookmarks.length}
+            </button>
           </div>
 
           <div className="articles-layout">
             <div className="articles-main">
-              <div className="articles-results">
+              <div
+                className="articles-results"
+                ref={resultsRef}
+                tabIndex="-1"
+              >
                 <span>
                   Showing {firstVisibleIndex}–{lastVisibleIndex} of{" "}
                   {filteredArticles.length} articles
                 </span>
 
                 {(query ||
-                  category !== "All categories" ||
-                  sortBy !== "newest") && (
+                  activeCategory !== ALL_CATEGORIES ||
+                  sortBy !== "newest" ||
+                  savedOnly) && (
                   <button type="button" onClick={resetFilters}>
                     Clear filters
                   </button>
@@ -264,8 +521,13 @@ const Blog = () => {
                 <div className="articles-grid">
                   {visibleArticles.map((article) => (
                     <article className="articles-card" key={article.id}>
+                      <BookmarkToggle
+                        article={article}
+                        onRemove={handleSavedBookmarkRemoval}
+                      />
                       <Link
                         className="articles-card__image"
+                        state={articleLinkState}
                         to={`/blog/${article.id}`}
                       >
                         <img
@@ -285,12 +547,27 @@ const Blog = () => {
                         </div>
 
                         <h2>
-                          <Link to={`/blog/${article.id}`}>
+                          <Link
+                            state={articleLinkState}
+                            to={`/blog/${article.id}`}
+                          >
                             {article.title}
                           </Link>
                         </h2>
 
                         <p>{article.excerpt}</p>
+
+                        {progressByArticleId[String(article.id)]?.isStarted && (
+                          <div className="articles-card__progress">
+                            <ReadingProgress
+                              articleTitle={article.title}
+                              compact
+                              progress={
+                                progressByArticleId[String(article.id)].progress
+                              }
+                            />
+                          </div>
+                        )}
 
                         <div className="articles-card__footer">
                           <div>
@@ -300,7 +577,10 @@ const Blog = () => {
                             </span>
                           </div>
 
-                          <Link to={`/blog/${article.id}`}>
+                          <Link
+                            state={articleLinkState}
+                            to={`/blog/${article.id}`}
+                          >
                             Read article →
                           </Link>
                         </div>
@@ -310,12 +590,18 @@ const Blog = () => {
                 </div>
               ) : (
                 <div className="articles-empty">
-                  <h2>No articles found</h2>
+                  <h2>
+                    {savedOnly
+                      ? "No saved insights match"
+                      : "No articles found"}
+                  </h2>
                   <p>
-                    Change the search query or selected category.
+                    {savedOnly
+                      ? "Save an article or clear the current filters."
+                      : "Change the search query or selected category."}
                   </p>
                   <button type="button" onClick={resetFilters}>
-                    Reset filters
+                    {savedOnly ? "Show all insights" : "Reset filters"}
                   </button>
                 </div>
               )}
@@ -327,8 +613,8 @@ const Blog = () => {
                 >
                   <button
                     type="button"
-                    disabled={page === 1}
-                    onClick={() => changePage(page - 1)}
+                    disabled={currentPage === 1}
+                    onClick={() => changePage(currentPage - 1)}
                   >
                     ← Previous
                   </button>
@@ -340,9 +626,9 @@ const Blog = () => {
                     <button
                       type="button"
                       key={item}
-                      className={page === item ? "active" : ""}
+                      className={currentPage === item ? "active" : ""}
                       onClick={() => changePage(item)}
-                      aria-current={page === item ? "page" : undefined}
+                      aria-current={currentPage === item ? "page" : undefined}
                     >
                       {item}
                     </button>
@@ -350,8 +636,8 @@ const Blog = () => {
 
                   <button
                     type="button"
-                    disabled={page === totalPages}
-                    onClick={() => changePage(page + 1)}
+                    disabled={currentPage === totalPages}
+                    onClick={() => changePage(currentPage + 1)}
                   >
                     Next →
                   </button>
@@ -365,21 +651,56 @@ const Blog = () => {
                 <h2>Useful engineering, without noise.</h2>
                 <p>One practical article every week.</p>
 
-                <form onSubmit={handleSubscribe}>
+                <form
+                  onSubmit={handleSubscribe}
+                  aria-busy={subscriptionState.status === "submitting"}
+                >
                   <input
                     type="email"
+                    name="email"
                     value={email}
-                    onChange={(event) =>
-                      setEmail(event.target.value)
-                    }
+                    onChange={handleEmailChange}
                     placeholder="Email address"
+                    autoComplete="email"
+                    aria-label="Email address"
+                    aria-describedby={
+                      subscriptionState.message
+                        ? "newsletter-status"
+                        : undefined
+                    }
+                    aria-invalid={subscriptionState.status === "error"}
+                    disabled={subscriptionState.status === "submitting"}
                     required
                   />
-                  <button type="submit">Subscribe</button>
+                  <button
+                    type="submit"
+                    disabled={subscriptionState.status === "submitting"}
+                  >
+                    {subscriptionState.status === "submitting"
+                      ? "Subscribing…"
+                      : "Subscribe"}
+                  </button>
                 </form>
 
-                {subscribed && (
-                  <small>Subscription confirmed.</small>
+                {subscriptionState.message && (
+                  <small
+                    id="newsletter-status"
+                    className={
+                      subscriptionState.status === "error"
+                        ? "is-error"
+                        : "is-success"
+                    }
+                    role={
+                      subscriptionState.status === "error" ? "alert" : "status"
+                    }
+                    aria-live={
+                      subscriptionState.status === "error"
+                        ? "assertive"
+                        : "polite"
+                    }
+                  >
+                    {subscriptionState.message}
+                  </small>
                 )}
               </div>
 
@@ -387,12 +708,17 @@ const Blog = () => {
                 <h2>Categories</h2>
 
                 <div className="articles-category-list">
-                  {NORMALIZED_CATEGORIES.map((item) => (
+                  {normalizedCategories.map((item) => (
                     <button
                       type="button"
                       key={item}
-                      className={category === item ? "active" : ""}
-                      onClick={() => setCategory(item)}
+                      className={activeCategory === item ? "active" : ""}
+                      onClick={() =>
+                        updateFilters({
+                          category:
+                            item === ALL_CATEGORIES ? null : item,
+                        })
+                      }
                     >
                       <span>{item}</span>
                       <strong>{getCategoryCount(item)}</strong>
@@ -401,10 +727,14 @@ const Blog = () => {
                 </div>
               </div>
 
-              <div className="articles-sidebar__block articles-popular">
+              {popularArticle && (
+                <div className="articles-sidebar__block articles-popular">
                 <span>Most discussed</span>
 
-                <Link to={`/blog/${popularArticle.id}`}>
+                <Link
+                  state={articleLinkState}
+                  to={`/blog/${popularArticle.id}`}
+                >
                   <img
                     src={popularArticle.image}
                     alt={popularArticle.title}
@@ -414,23 +744,27 @@ const Blog = () => {
                 </Link>
 
                 <p>{popularArticle.commentCount} comments</p>
-              </div>
-
-              <div className="articles-sidebar__block articles-recent">
-                <h2>Recent articles</h2>
-
-                <div className="articles-recent__list">
-                  {recentArticles.map((article) => (
-                    <Link
-                      key={article.id}
-                      to={`/blog/${article.id}`}
-                    >
-                      <span>{formatDate(article.publishedAt)}</span>
-                      <strong>{article.title}</strong>
-                    </Link>
-                  ))}
                 </div>
-              </div>
+              )}
+
+              {recentArticles.length > 0 && (
+                <div className="articles-sidebar__block articles-recent">
+                  <h2>Recent articles</h2>
+
+                  <div className="articles-recent__list">
+                    {recentArticles.map((article) => (
+                      <Link
+                        key={article.id}
+                        state={articleLinkState}
+                        to={`/blog/${article.id}`}
+                      >
+                        <span>{formatDate(article.publishedAt)}</span>
+                        <strong>{article.title}</strong>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="articles-sidebar__block articles-tags">
                 <h2>Popular tags</h2>
@@ -440,10 +774,9 @@ const Blog = () => {
                     <button
                       type="button"
                       key={tag}
-                      onClick={() => {
-                        setQuery(tag);
-                        setCategory("All categories");
-                      }}
+                      onClick={() =>
+                        updateFilters({ q: tag, category: null })
+                      }
                     >
                       {tag}
                     </button>
@@ -452,6 +785,8 @@ const Blog = () => {
               </div>
             </aside>
           </div>
+            </>
+          )}
         </div>
       </section>
     </main>

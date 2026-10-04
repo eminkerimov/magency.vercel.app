@@ -1,45 +1,123 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import {
   createBrowserRouter,
-  Navigate,
   RouterProvider,
   Outlet,
   useLocation,
+  useParams,
 } from "react-router-dom";
 
+import ContentState from "./components/ContentState";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import NotFound from "./components/NotFound";
 
 import Home from "./pages/Home";
-import Blog from "./pages/Blog";
-import InnerBlog from "./pages/InnerBlog";
-import Categories from "./pages/Categories";
+
+const Blog = lazy(() => import("./pages/Blog"));
+const InnerBlog = lazy(() => import("./pages/InnerBlog"));
+const Categories = lazy(() => import("./pages/Categories"));
+const Work = lazy(() => import("./pages/Work"));
+const WorkDetail = lazy(() => import("./pages/WorkDetail"));
 
 const ScrollToLocation = () => {
-  const { pathname, hash } = useLocation();
+  const { pathname, hash, state } = useLocation();
+  const previousPathname = useRef(pathname);
 
   useEffect(() => {
-    if (hash) {
-      requestAnimationFrame(() => {
-        document.getElementById(hash.slice(1))?.scrollIntoView();
-      });
+    const routeChanged = previousPathname.current !== pathname;
+    previousPathname.current = pathname;
+
+    if (state?.preserveScroll) {
       return;
     }
 
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [pathname, hash]);
+    let animationFrame;
+    let observer;
+
+    const focus = (element) => {
+      if (!element) return false;
+
+      if (!element.hasAttribute("tabindex")) {
+        element.setAttribute("tabindex", "-1");
+      }
+
+      element.focus({ preventScroll: true });
+      return true;
+    };
+
+    const findAndFocus = () => {
+      const target = hash
+        ? document.getElementById(hash.slice(1))
+        : document.querySelector(
+            "#main-content h1, #main-content [role=\"alert\"] h2"
+          );
+
+      if (!target) return false;
+
+      if (hash) {
+        target.scrollIntoView();
+      }
+
+      return focus(target);
+    };
+
+    const shouldMoveFocus = Boolean(hash) || routeChanged;
+
+    animationFrame = requestAnimationFrame(() => {
+      if (!hash) {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
+
+      if (!shouldMoveFocus || findAndFocus()) return;
+
+      observer = new MutationObserver(() => {
+        if (findAndFocus()) {
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.getElementById("main-content"), {
+        childList: true,
+        subtree: true,
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      observer?.disconnect();
+    };
+  }, [pathname, hash, state]);
 
   return null;
 };
 
 const Layout = () => (
-  <>
-    <ScrollToLocation />
-    <Header />
-    <Outlet />
-    <Footer />
-  </>
+    <>
+      <ScrollToLocation />
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <Header />
+      <div id="main-content" tabIndex={-1}>
+        <Suspense
+          fallback={
+            <main className="route-loading">
+              <div className="container">
+                <ContentState count={3} label="Loading page" />
+              </div>
+            </main>
+          }
+        >
+          <Outlet />
+        </Suspense>
+      </div>
+      <Footer />
+    </>
 );
+
+const ArticleRoute = () => {
+  const { id } = useParams();
+
+  return <InnerBlog key={id} />;
+};
 
 const router = createBrowserRouter([
   {
@@ -56,15 +134,23 @@ const router = createBrowserRouter([
       },
       {
         path: "blog/:id",
-        element: <InnerBlog />,
+        element: <ArticleRoute />,
       },
       {
         path: "categories",
         element: <Categories />,
       },
       {
+        path: "work",
+        element: <Work />,
+      },
+      {
+        path: "work/:slug",
+        element: <WorkDetail />,
+      },
+      {
         path: "*",
-        element: <Navigate to="/" replace />,
+        element: <NotFound />,
       },
     ],
   },

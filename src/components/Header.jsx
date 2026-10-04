@@ -1,25 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const navigation = [
   { label: "Home", href: "/" },
-  { label: "Articles", href: "/blogs" },
-  { label: "Categories", href: "/categories" },
-  { label: "About", href: "/#team" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Services", href: "/#services" },
+  { label: "Work", href: "/work" },
+  { label: "Insights", href: "/blogs" },
+  { label: "Topics", href: "/categories" },
   { label: "Contact", href: "/#contact" },
 ];
 
 const Header = () => {
   const { pathname, hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
+  const toggleRef = useRef(null);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname, hash]);
+    if (!menuOpen) return undefined;
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      navRef.current?.querySelector("a")?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [menuOpen]);
 
   const isActive = (href) => {
     if (href === "/blogs") return pathname.startsWith("/blog");
+    if (href === "/work") return pathname.startsWith("/work");
     if (href === "/categories") return pathname === "/categories";
     if (href === "/") return pathname === "/" && !hash;
 
@@ -27,7 +36,14 @@ const Header = () => {
   };
 
   return (
-    <header className="site-header">
+    <header
+      className="site-header"
+      onKeyDown={(event) => {
+        if (event.key !== "Escape" || !menuOpen) return;
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+      }}
+    >
       <div className="container">
         <div className="site-header__inner">
           <Link className="logo" to="/" aria-label="M-Agency home">
@@ -36,7 +52,9 @@ const Header = () => {
           </Link>
 
           <nav
+            ref={navRef}
             className={`site-nav${menuOpen ? " is-open" : ""}`}
+            id="primary-navigation"
             aria-label="Primary navigation"
           >
             <ul className="menu">
@@ -61,17 +79,19 @@ const Header = () => {
 
           <Link
             className="site-header__cta"
-            to="/#pricing"
+            to="/#contact"
             onClick={() => setMenuOpen(false)}
           >
-            Subscribe
+            Start a project
           </Link>
 
           <button
+            ref={toggleRef}
             className="site-header__toggle"
             type="button"
-            aria-label="Toggle navigation"
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
+            aria-controls="primary-navigation"
             onClick={() => setMenuOpen((open) => !open)}
           >
             <span></span>
