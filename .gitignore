@@ -12,6 +12,7 @@
 /build
 /dist
 /.vercel
+/.qa-chrome-*
 
 # misc
 .DS_Store

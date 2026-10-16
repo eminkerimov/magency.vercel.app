@@ -10,6 +10,7 @@ import {
 import ContentState from "./components/ContentState";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import MotionEffects from "./components/MotionEffects";
 import NotFound from "./components/NotFound";
 
 import Home from "./pages/Home";
@@ -19,16 +20,19 @@ const InnerBlog = lazy(() => import("./pages/InnerBlog"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Work = lazy(() => import("./pages/Work"));
 const WorkDetail = lazy(() => import("./pages/WorkDetail"));
+const StartProject = lazy(() => import("./pages/StartProject"));
 
 const ScrollToLocation = () => {
   const { pathname, hash, state } = useLocation();
+  const preserveScroll = state?.preserveScroll;
+  const scrollRequest = state?.scrollRequest;
   const previousPathname = useRef(pathname);
 
   useEffect(() => {
     const routeChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
 
-    if (state?.preserveScroll) {
+    if (preserveScroll) {
       return;
     }
 
@@ -62,7 +66,8 @@ const ScrollToLocation = () => {
       return focus(target);
     };
 
-    const shouldMoveFocus = Boolean(hash) || routeChanged;
+    const shouldMoveFocus =
+      Boolean(hash) || routeChanged || Boolean(scrollRequest);
 
     animationFrame = requestAnimationFrame(() => {
       if (!hash) {
@@ -76,7 +81,11 @@ const ScrollToLocation = () => {
           observer.disconnect();
         }
       });
-      observer.observe(document.getElementById("main-content"), {
+      const mainContent = document.getElementById("main-content");
+
+      if (!mainContent) return;
+
+      observer.observe(mainContent, {
         childList: true,
         subtree: true,
       });
@@ -86,7 +95,7 @@ const ScrollToLocation = () => {
       cancelAnimationFrame(animationFrame);
       observer?.disconnect();
     };
-  }, [pathname, hash, state]);
+  }, [pathname, hash, preserveScroll, scrollRequest]);
 
   return null;
 };
@@ -94,6 +103,7 @@ const ScrollToLocation = () => {
 const Layout = () => (
     <>
       <ScrollToLocation />
+      <MotionEffects />
       <a className="skip-link" href="#main-content">Skip to content</a>
       <Header />
       <div id="main-content" tabIndex={-1}>
@@ -147,6 +157,10 @@ const router = createBrowserRouter([
       {
         path: "work/:slug",
         element: <WorkDetail />,
+      },
+      {
+        path: "start-project",
+        element: <StartProject />,
       },
       {
         path: "*",

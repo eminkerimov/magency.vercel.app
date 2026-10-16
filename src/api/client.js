@@ -33,9 +33,18 @@ export const apiRequest = async (path, options = {}) => {
   }
 
   const contentType = response.headers.get("content-type") || "";
-  const payload = contentType.includes("application/json")
-    ? await response.json()
-    : null;
+  let payload = null;
+
+  if (/json\b/i.test(contentType)) {
+    try {
+      payload = await response.json();
+    } catch {
+      throw new ApiError("The API returned an invalid JSON response.", {
+        status: response.status,
+        code: "INVALID_RESPONSE",
+      });
+    }
+  }
 
   if (!response.ok) {
     throw new ApiError(

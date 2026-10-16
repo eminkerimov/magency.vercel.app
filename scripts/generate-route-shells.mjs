@@ -27,6 +27,12 @@ const routes = [
       "Explore three frontend portfolio case studies spanning media discovery, editorial archives, and nature-stay booking experiences.",
   },
   {
+    path: "/start-project",
+    title: "Start a Project | M-Agency",
+    description:
+      "Build a focused project brief for a frontend product audit, delivery milestone, or ongoing product support engagement.",
+  },
+  {
     path: "/blogs",
     title: "Engineering Insights | M-Agency",
     description:

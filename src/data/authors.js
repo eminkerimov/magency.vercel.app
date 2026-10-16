@@ -1,3 +1,17 @@
+import adrianPhoto from "../assets/img/author-frontend.jpg";
+import fernandoPhoto from "../assets/img/author-devops.jpg";
+import adedayoPhoto from "../assets/img/author-career.jpg";
+import naratePhoto from "../assets/img/author-backend.jpg";
+import mayaPhoto from "../assets/img/testimonial-maya.jpg";
+
+const authorPortraitsByName = {
+  "Adrian Thomas": adrianPhoto,
+  "Narate Ketram": naratePhoto,
+  "Fernando Comet": fernandoPhoto,
+  "Adedayo Saheed": adedayoPhoto,
+  "Maya Chen": mayaPhoto,
+};
+
 export const authorProfilesByName = {
   "Adrian Thomas": {
     name: "Adrian Thomas",
@@ -44,4 +58,10 @@ export function getAuthorProfile(name) {
   }
 
   return authorProfilesByName[name.trim()] || genericAuthorProfile;
+}
+
+export function getAuthorPortrait(name) {
+  if (typeof name !== "string") return "";
+
+  return authorPortraitsByName[name.trim()] || "";
 }

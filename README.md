@@ -18,6 +18,7 @@ Magency is a modern digital-agency experience built as a Senior Frontend Develop
 - `/` - agency overview, services, selected work, process, team, engagement formats, and contact flow
 - `/work` - responsive case-study catalogue for all three portfolio products
 - `/work/:slug` - full case narrative with challenge, delivery, frontend decisions, outcome, and adjacent-case navigation
+- `/start-project` - accessible three-step project brief with service, engagement, and case-study context
 - `/blogs` - searchable, sortable, paginated, and bookmark-aware insight library
 - `/blog/:id` - structured article reading experience with progress, helpfulness, sharing, bookmarks, and discussion
 - `/categories` - topic discovery and category navigation
@@ -73,8 +74,8 @@ Case selection is encoded as `?work=<slug>#work`, so a selected project can be
 shared and restored through browser back/forward navigation. The accessible tab
 interface supports click, Arrow Left/Right, Home, and End interaction. It also
 includes asynchronous loading, empty, error, and retry states. Each case ends
-with a `Build something together` CTA that opens the contact flow with
-`interest=focused-build`.
+with a contextual CTA to `/start-project`, carrying both the engagement and
+the referenced case in the URL.
 
 The same case-study response powers the dedicated `/work` catalogue and
 `/work/:slug` detail routes. This keeps the home selector, catalogue cards,
@@ -83,10 +84,16 @@ second content source.
 
 The home page presents three real agency engagement formats instead of
 fictional paid memberships: Product Audit, Focused Build, and Ongoing Product
-Support. Each CTA opens the contact form with a whitelisted
-`?interest=<slug>#contact` URL, so the selected format survives reloads,
-back/forward navigation, and shared links. Switching formats does not clear
-contact details already entered in the current session.
+Support. Each CTA opens the project brief with a whitelisted
+`?interest=<slug>` URL, so the selected format survives reloads,
+back/forward navigation, and shared links.
+
+The header, hero, service cards, engagement cards, work catalogue, and case
+details no longer collapse into one contact anchor. Generic project intent
+opens `/start-project`; service and case CTAs add contextual query parameters;
+the footer's Quick contact link remains a direct path to the shorter home-page
+form. The project brief validates each step, submits through `POST /api/contact`,
+and returns a browser-local demo receipt without requiring a backend.
 
 `POST /api/contact` validates the selected engagement in addition to the
 existing form fields. The browser-local receipt stores only the request ID,

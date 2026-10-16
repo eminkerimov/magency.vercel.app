@@ -1,26 +1,24 @@
-import React from "react";
-
 const processSteps = [
   {
-    number: "01",
+    id: "discover",
     title: "Discover",
     text: "Align on the product goal, users, constraints, and the systems already in place.",
     outcome: "Shared context",
   },
   {
-    number: "02",
+    id: "define",
     title: "Define",
     text: "Turn what we learn into a focused scope, technical direction, and practical delivery plan.",
     outcome: "Clear roadmap",
   },
   {
-    number: "03",
+    id: "build",
     title: "Build",
     text: "Design and engineer in small, verifiable increments with visible progress and early feedback.",
     outcome: "Working software",
   },
   {
-    number: "04",
+    id: "launch-improve",
     title: "Launch & improve",
     text: "Release carefully, observe real behavior, and use evidence to guide the next improvements.",
     outcome: "Confident next steps",
@@ -41,19 +39,21 @@ const Process = () => (
         </p>
       </header>
 
-      <ol className="delivery-process__grid">
+      <div className="delivery-process__board" role="list">
         {processSteps.map((step) => (
-          <li className="delivery-step" key={step.number}>
-            <div className="delivery-step__top">
-              <span className="delivery-step__number">{step.number}</span>
-              <span className="delivery-step__line" aria-hidden="true" />
+          <article className="process-phase" role="listitem" key={step.id}>
+            <div className="process-phase__copy">
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
             </div>
-            <h3>{step.title}</h3>
-            <p>{step.text}</p>
-            <strong>{step.outcome}</strong>
-          </li>
+
+            <footer className="process-phase__outcome">
+              <span>Outcome</span>
+              <strong>{step.outcome}</strong>
+            </footer>
+          </article>
         ))}
-      </ol>
+      </div>
     </div>
   </section>
 );

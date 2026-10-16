@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Link,
   useLocation,
+  useNavigate,
   useParams,
 } from "react-router-dom";
 import ContentState from "../components/ContentState";
@@ -14,6 +15,7 @@ import BookmarkToggle from "../features/bookmarks/BookmarkToggle";
 import ArticleDiscussion from "../features/comments/ArticleDiscussion";
 import ArticleHelpfulness from "../features/helpfulness/ArticleHelpfulness";
 import { useReadingProgress } from "../features/readingProgress";
+import { getAuthorPortrait } from "../data/authors";
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -21,6 +23,8 @@ const formatDate = (date) =>
     month: "long",
     year: "numeric",
   }).format(new Date(`${date}T00:00:00`));
+
+const EMPTY_SECTIONS = [];
 
 const copyText = async (text, trigger) => {
   let clipboardError;
@@ -61,8 +65,11 @@ const copyText = async (text, trigger) => {
 const InnerBlog = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const articleBodyRef = useRef(null);
   const progressBarRef = useRef(null);
+  const tocRef = useRef(null);
+  const tocToggleRef = useRef(null);
   const lastRecordedStepRef = useRef(0);
   const trackedArticleRef = useRef("");
   const copyResetTimerRef = useRef(null);
@@ -70,6 +77,8 @@ const InnerBlog = () => {
     articleId: "",
     status: "idle",
   });
+  const [activeSectionId, setActiveSectionId] = useState("");
+  const [isTocOpen, setIsTocOpen] = useState(false);
   const {
     data,
     error,
@@ -87,8 +96,9 @@ const InnerBlog = () => {
   const previousArticle = data?.previousArticle;
   const nextArticle = data?.nextArticle;
   const relatedArticles = data?.relatedArticles || [];
-  const articleSections = article?.content?.sections || [];
+  const articleSections = article?.content?.sections || EMPTY_SECTIONS;
   const authorProfile = article?.authorProfile;
+  const authorPortrait = getAuthorPortrait(article?.author);
   const insightsOrigin =
     typeof location.state?.from === "string" &&
     location.state.from.startsWith("/blogs")
@@ -187,6 +197,81 @@ const InnerBlog = () => {
       window.cancelAnimationFrame(animationFrame);
     };
   }, [article?.id, markComplete, recordProgress]);
+
+  useEffect(() => {
+    const sections = articleSections
+      .map((section) => document.getElementById(section.id))
+      .filter(Boolean);
+
+    if (!sections.length) return undefined;
+
+    let animationFrame = 0;
+
+    const updateActiveSection = () => {
+      if (animationFrame) return;
+
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0;
+        const marker = Math.min(190, window.innerHeight * 0.28);
+        const activeSection = sections.reduce((current, section) => {
+          if (section.getBoundingClientRect().top <= marker) {
+            return section;
+          }
+
+          return current;
+        }, sections[0]);
+
+        setActiveSectionId(activeSection.id);
+      });
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", updateActiveSection, { passive: true });
+    window.addEventListener("resize", updateActiveSection);
+
+    return () => {
+      window.removeEventListener("scroll", updateActiveSection);
+      window.removeEventListener("resize", updateActiveSection);
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, [articleSections]);
+
+  useEffect(() => {
+    if (!isTocOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!tocRef.current?.contains(event.target)) {
+        setIsTocOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+
+      event.preventDefault();
+      setIsTocOpen(false);
+      tocToggleRef.current?.focus();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isTocOpen]);
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 901px)");
+    const closeOnDesktop = (event) => {
+      if (event.matches) setIsTocOpen(false);
+    };
+
+    desktopQuery.addEventListener("change", closeOnDesktop);
+
+    return () => desktopQuery.removeEventListener("change", closeOnDesktop);
+  }, []);
 
   if (isPending) {
     return (
@@ -304,6 +389,29 @@ const InnerBlog = () => {
       : copyStatus === "error"
         ? "Could not copy the link. Try again or use the address bar."
         : "";
+  const activeSection =
+    articleSections.find((section) => section.id === activeSectionId) ||
+    articleSections[0];
+
+  const handleTocNavigation = (event, sectionId) => {
+    event.preventDefault();
+    setIsTocOpen(false);
+    navigate(
+      {
+        pathname: location.pathname,
+        search: location.search,
+        hash: `#${sectionId}`,
+      },
+      {
+        replace: true,
+        state: {
+          ...(location.state || {}),
+          preserveScroll: false,
+          scrollRequest: event.timeStamp,
+        },
+      }
+    );
+  };
 
   const handleCopyLink = async (event) => {
     if (copyStatus === "copying") return;
@@ -423,13 +531,42 @@ const InnerBlog = () => {
 
       <section className="article-content">
         <div className="container article-content__layout">
-          <aside className="article-toc">
-            <span>On this page</span>
-            <nav>
+          <aside
+            className={`article-toc${isTocOpen ? " is-open" : ""}`}
+            ref={tocRef}
+          >
+            <button
+              aria-controls="article-section-navigation"
+              aria-expanded={isTocOpen}
+              aria-label={isTocOpen ? "Close article navigation" : "Open article navigation"}
+              className="article-toc__toggle"
+              onClick={() => setIsTocOpen((open) => !open)}
+              ref={tocToggleRef}
+              type="button"
+            >
+              <span>
+                <small>On this page</small>
+                <strong>{activeSection?.label || activeSection?.title}</strong>
+              </span>
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                <path d="m7 9.5 5 5 5-5" />
+              </svg>
+            </button>
+            <span className="article-toc__label">On this page</span>
+            <nav id="article-section-navigation" aria-label="Article sections">
               {articleSections.map((section) => (
-                <a href={`#${section.id}`} key={section.id}>
+                <Link
+                  aria-current={activeSectionId === section.id ? "location" : undefined}
+                  key={section.id}
+                  onClick={(event) => handleTocNavigation(event, section.id)}
+                  to={{
+                    pathname: location.pathname,
+                    search: location.search,
+                    hash: `#${section.id}`,
+                  }}
+                >
                   {section.label || section.title}
-                </a>
+                </Link>
               ))}
             </nav>
           </aside>
@@ -481,7 +618,7 @@ const InnerBlog = () => {
         <div className="container article-content__end">
           <div className="article-content__end-inner">
             <ArticleHelpfulness
-              key={article.id}
+              key={`helpfulness-${article.id}`}
               articleId={article.id}
             />
 
@@ -495,10 +632,16 @@ const InnerBlog = () => {
 
             <div className="article-author">
               <div className="article-author__avatar">
-                {article.author
-                  .split(" ")
-                  .map((part) => part[0])
-                  .join("")}
+                {authorPortrait ? (
+                  <img src={authorPortrait} alt="" loading="lazy" />
+                ) : (
+                  <span aria-hidden="true">
+                    {article.author
+                      .split(" ")
+                      .map((part) => part[0])
+                      .join("")}
+                  </span>
+                )}
               </div>
 
               <div>
@@ -511,7 +654,7 @@ const InnerBlog = () => {
               </div>
             </div>
 
-            <ArticleDiscussion key={article.id} article={article} />
+            <ArticleDiscussion key={`discussion-${article.id}`} article={article} />
           </div>
         </div>
       </section>

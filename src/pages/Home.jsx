@@ -11,6 +11,7 @@ import Seo from '../components/Seo'
 import Services from '../components/Services'
 import Team from '../components/Team'
 import TechnologyStack from '../components/TechnologyStack'
+import { getAuthorPortrait } from '../data/authors'
 import { engagements, getEngagement } from '../data/engagements'
 import { useArticlesQuery } from '../features/articles/queries'
 
@@ -27,6 +28,28 @@ const initialContactForm = {
     email: '',
     message: '',
     website: '',
+}
+
+const CONTACT_DRAFT_KEY = 'magency:v1:contact-draft'
+const MAX_MESSAGE_LENGTH = 1200
+
+const readContactDraft = () => {
+    if (typeof window === 'undefined') return initialContactForm
+
+    try {
+        const draft = JSON.parse(window.sessionStorage.getItem(CONTACT_DRAFT_KEY))
+
+        if (!draft || typeof draft !== 'object') return initialContactForm
+
+        return {
+            ...initialContactForm,
+            name: typeof draft.name === 'string' ? draft.name : '',
+            email: typeof draft.email === 'string' ? draft.email : '',
+            message: typeof draft.message === 'string' ? draft.message : '',
+        }
+    } catch {
+        return initialContactForm
+    }
 }
 
 const initialContactState = {
@@ -60,7 +83,7 @@ const Home = () => {
     isPending: isArticlesPending,
     refetch: refetchArticles,
   } = useArticlesQuery()
-  const [contactForm, setContactForm] = useState(initialContactForm)
+  const [contactForm, setContactForm] = useState(readContactDraft)
   const [contactState, setContactState] = useState(initialContactState)
   const isSubmitting = contactState.status === 'submitting'
   const selectedEngagement = getEngagement(searchParams.get('interest'))
@@ -77,6 +100,7 @@ const Home = () => {
             ...article,
             ...articleThemes[id],
             href: `/blog/${article.id}`,
+            authorPortrait: getAuthorPortrait(article.author),
             initials: article.author.split(' ').map((part) => part[0]).join(''),
             dateLabel: new Intl.DateTimeFormat('en', {
                 month: 'short',
@@ -98,6 +122,25 @@ const Home = () => {
 
     return () => window.cancelAnimationFrame(animationFrame)
   }, [location.hash, selectedEngagementId])
+
+  useEffect(() => {
+    const draft = {
+        name: contactForm.name,
+        email: contactForm.email,
+        message: contactForm.message,
+    }
+    const hasDraft = Object.values(draft).some((value) => value.trim())
+
+    try {
+        if (hasDraft) {
+            window.sessionStorage.setItem(CONTACT_DRAFT_KEY, JSON.stringify(draft))
+        } else {
+            window.sessionStorage.removeItem(CONTACT_DRAFT_KEY)
+        }
+    } catch {
+        // The form still works when browser storage is unavailable.
+    }
+  }, [contactForm.email, contactForm.message, contactForm.name])
 
   const handleContactChange = ({ target: { name, value } }) => {
     setContactForm((current) => ({ ...current, [name]: value }))
@@ -162,14 +205,28 @@ const Home = () => {
         setContactForm(initialContactForm)
         setContactState({
             status: 'success',
-            message: `Thanks — request ${response.requestId} has been received.`,
+            message: `Demo receipt ${response.requestId} was saved in this browser.`,
             fields: {},
         })
     } catch (error) {
+        const responseFields = error?.fields || {}
+
         setContactState({
             status: 'error',
             message: error?.message || 'The request could not be sent. Please try again.',
-            fields: error?.fields || {},
+            fields: responseFields,
+        })
+
+        window.requestAnimationFrame(() => {
+            const firstInvalidField = ['engagement', 'name', 'email', 'message'].find(
+                (field) => responseFields[field]
+            )
+            const field =
+                firstInvalidField === 'engagement'
+                    ? engagementSelectRef.current
+                    : contactFieldRefs.current[firstInvalidField]
+
+            field?.focus()
         })
     }
   }
@@ -191,7 +248,7 @@ const Home = () => {
     <div className="container">
         <div className="featured-articles__heading">
             <div>
-                <span>From our team</span>
+                <span>Engineering notes</span>
                 <h2>Latest Insights</h2>
                 <p>Practical perspectives on the engineering decisions behind reliable digital products.</p>
             </div>
@@ -241,7 +298,11 @@ const Home = () => {
                         <p>{article.excerpt}</p>
                         <div className="article-card__footer">
                             <div className="article-card__author">
-                                <span>{article.initials}</span>
+                                {article.authorPortrait ? (
+                                    <img src={article.authorPortrait} alt="" loading="eager" />
+                                ) : (
+                                    <span aria-hidden="true">{article.initials}</span>
+                                )}
                                 <div>
                                     <strong>{article.author}</strong>
                                     <time dateTime={article.publishedAt}>{article.dateLabel}</time>
@@ -282,32 +343,39 @@ const Home = () => {
                 <h2 id="contact-title">Tell us what you’re building</h2>
                 <p>Share your goals, timeline, and where you need support so we can understand the project.</p>
 
-                <div className="contact__links">
-                    <a href="https://magency.vercel.app">
-                        <span>Website</span>
-                        <strong>magency.vercel.app</strong>
-                        <i aria-hidden="true">↗</i>
-                    </a>
-                    <a href="mailto:editor@magency.vercel.app">
-                        <span>Projects</span>
-                        <strong>editor@magency.vercel.app</strong>
-                        <i aria-hidden="true">↗</i>
-                    </a>
-                    <a href="mailto:support@magency.vercel.app">
-                        <span>Support</span>
-                        <strong>support@magency.vercel.app</strong>
-                        <i aria-hidden="true">↗</i>
-                    </a>
+                <div className="contact__routes">
+                    <Link to="/start-project">
+                        <span>Need direction?</span>
+                        <strong>Use the guided project brief</strong>
+                        <i aria-hidden="true">&#8594;</i>
+                    </Link>
+                    <Link to="/work">
+                        <span>Want evidence first?</span>
+                        <strong>Explore selected case studies</strong>
+                        <i aria-hidden="true">&#8594;</i>
+                    </Link>
                 </div>
+
             </div>
 
             <form
+                id="project-enquiry-form"
                 className="contact__form"
                 onSubmit={handleContactSubmit}
                 noValidate
                 aria-busy={isSubmitting}
                 aria-labelledby="contact-title"
             >
+                <div className="contact__form-heading">
+                    <div>
+                        <span>Direct enquiry</span>
+                        <strong>Project brief</strong>
+                    </div>
+                    <span className="contact__demo-badge">Browser demo</span>
+                </div>
+                <p className="contact__demo-note">
+                    Validated and saved only in this browser. Nothing is sent.
+                </p>
                 <label className="contact__honeypot" aria-hidden="true">
                     <span>Leave this field blank</span>
                     <input
@@ -321,8 +389,8 @@ const Home = () => {
                     />
                 </label>
                 <div className="contact__fields">
-                    <label className="contact__engagement">
-                        <span>What do you need?</span>
+                    <div className="contact__field contact__engagement">
+                        <label htmlFor="contact-engagement">What do you need?</label>
                         <select
                             id="contact-engagement"
                             ref={engagementSelectRef}
@@ -330,9 +398,14 @@ const Home = () => {
                             value={selectedEngagementId}
                             onChange={handleEngagementChange}
                             disabled={isSubmitting}
-                            aria-describedby="contact-engagement-hint"
+                            aria-invalid={Boolean(contactState.fields.engagement)}
+                            aria-describedby={
+                                contactState.fields.engagement
+                                    ? 'contact-engagement-hint contact-engagement-error'
+                                    : 'contact-engagement-hint'
+                            }
                         >
-                            <option value="">Not sure yet — help me choose</option>
+                            <option value="">Help me choose</option>
                             {engagements.map((engagement) => (
                                 <option value={engagement.id} key={engagement.id}>
                                     {engagement.title}
@@ -345,10 +418,16 @@ const Home = () => {
                         >
                             Choose a starting point. Final scope follows discovery.
                         </small>
-                    </label>
-                    <label>
-                        <span>Name</span>
+                        {contactState.fields.engagement && (
+                            <small className="contact__field-error" id="contact-engagement-error">
+                                {contactState.fields.engagement}
+                            </small>
+                        )}
+                    </div>
+                    <div className="contact__field">
+                        <label htmlFor="contact-name">Name</label>
                         <input
+                            id="contact-name"
                             ref={(element) => {
                                 contactFieldRefs.current.name = element
                             }}
@@ -369,10 +448,11 @@ const Home = () => {
                                 {contactState.fields.name}
                             </small>
                         )}
-                    </label>
-                    <label>
-                        <span>Email</span>
+                    </div>
+                    <div className="contact__field">
+                        <label htmlFor="contact-email">Email</label>
                         <input
+                            id="contact-email"
                             ref={(element) => {
                                 contactFieldRefs.current.email = element
                             }}
@@ -393,10 +473,11 @@ const Home = () => {
                                 {contactState.fields.email}
                             </small>
                         )}
-                    </label>
-                    <label className="contact__message">
-                        <span>Message</span>
+                    </div>
+                    <div className="contact__field contact__message">
+                        <label htmlFor="contact-message">Message</label>
                         <textarea
+                            id="contact-message"
                             ref={(element) => {
                                 contactFieldRefs.current.message = element
                             }}
@@ -409,26 +490,38 @@ const Home = () => {
                                     : 'Goals, scope, timeline, and any useful context'
                             }
                             minLength={20}
+                            maxLength={MAX_MESSAGE_LENGTH}
                             required
                             disabled={isSubmitting}
                             aria-invalid={Boolean(contactState.fields.message)}
-                            aria-describedby={contactState.fields.message ? 'contact-message-error' : undefined}
+                            aria-describedby={
+                                contactState.fields.message
+                                    ? 'contact-message-meta contact-message-error'
+                                    : 'contact-message-meta'
+                            }
                         ></textarea>
+                        <small className="contact__message-meta" id="contact-message-meta">
+                            <span>Draft stays in this browser</span>
+                            <span>{contactForm.message.length}/{MAX_MESSAGE_LENGTH}</span>
+                        </small>
                         {contactState.fields.message && (
                             <small className="contact__field-error" id="contact-message-error">
                                 {contactState.fields.message}
                             </small>
                         )}
-                    </label>
+                    </div>
                 </div>
-                <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Sending…' : 'Send project enquiry'} <span aria-hidden="true">→</span>
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    aria-label={isSubmitting ? 'Creating receipt' : 'Create demo receipt'}
+                >
+                    {isSubmitting ? 'Creating receipt...' : 'Create demo receipt'} <span aria-hidden="true">&#8594;</span>
                 </button>
                 {contactState.message && (
                     <p
                         className={`contact__status contact__status--${contactState.status}`}
                         role={contactState.status === 'error' ? 'alert' : 'status'}
-                        aria-live="polite"
                     >
                         {contactState.message}
                     </p>

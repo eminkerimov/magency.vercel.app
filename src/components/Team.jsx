@@ -1,20 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import teammember1 from "../assets/img/author-frontend.jpg";
-import teammember2 from "../assets/img/author-devops.jpg";
-import teammember3 from "../assets/img/author-career.jpg";
-import teammember4 from "../assets/img/author-backend.jpg";
-import mayaPhoto from "../assets/img/testimonial-maya.jpg";
-import { getAuthorProfile } from "../data/authors";
+import { getAuthorPortrait, getAuthorProfile } from "../data/authors";
 import ContentState from "./ContentState";
-
-const portraitsByName = {
-  "Adrian Thomas": teammember1,
-  "Narate Ketram": teammember4,
-  "Fernando Comet": teammember2,
-  "Adedayo Saheed": teammember3,
-  "Maya Chen": mayaPhoto,
-};
 
 const getInitials = (name) =>
   name
@@ -38,7 +25,7 @@ const buildContributors = (articles) => {
       contributors.set(name, {
         ...profile,
         name,
-        image: portraitsByName[name],
+        image: getAuthorPortrait(name),
         initials: getInitials(name),
         articleCount: 0,
       });
@@ -91,40 +78,37 @@ const Team = ({
             message="Contributor profiles will appear when the first insight is published."
           />
         ) : (
-          <div className="top-authors__grid">
+          <div className="top-authors__grid" role="list">
             {contributors.map((member) => {
               const countLabel = `${member.articleCount} ${member.articleCount === 1 ? "insight" : "insights"}`;
 
               return (
-                <article className="author-tile" key={member.name}>
-                  {member.image ? (
-                    <img
-                      className="author-tile__image"
-                      src={member.image}
-                      alt=""
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="author-tile__fallback" aria-hidden="true">
-                      <span>{member.initials}</span>
-                    </div>
-                  )}
-                  <div className="author-tile__overlay" aria-hidden="true" />
-                  <div className="author-tile__meta">
-                    <span className="author-tile__badge">{member.focus}</span>
-                    <span className="author-tile__count">{countLabel}</span>
-                  </div>
-                  <div className="author-tile__content">
-                    <h3>{member.name}</h3>
-                    <p>{member.role}</p>
-                    <Link
-                      to={`/blogs?q=${encodeURIComponent(member.name)}`}
-                      aria-label={`View ${countLabel} by ${member.name}`}
-                    >
-                      View insights <span aria-hidden="true">{"\u2192"}</span>
-                    </Link>
-                  </div>
-                </article>
+                <Link
+                  className="contributor-card"
+                  key={member.name}
+                  role="listitem"
+                  to={`/blogs?q=${encodeURIComponent(member.name)}`}
+                  aria-label={`Browse ${countLabel} by ${member.name}`}
+                >
+                  <span className="contributor-card__portrait">
+                    {member.image ? (
+                      <img src={member.image} alt="" loading="lazy" />
+                    ) : (
+                      <span aria-hidden="true">{member.initials}</span>
+                    )}
+                  </span>
+
+                  <span className="contributor-card__body">
+                    <span className="contributor-card__focus">{member.focus}</span>
+                    <strong>{member.name}</strong>
+                    <span className="contributor-card__role">{member.role}</span>
+                  </span>
+
+                  <span className="contributor-card__footer">
+                    <span>{countLabel}</span>
+                    <span aria-hidden="true">{"\u2192"}</span>
+                  </span>
+                </Link>
               );
             })}
           </div>

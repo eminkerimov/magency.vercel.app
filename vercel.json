@@ -25,6 +25,10 @@
       "destination": "/work/:slug/index.html"
     },
     {
+      "source": "/start-project",
+      "destination": "/start-project/index.html"
+    },
+    {
       "source": "/blogs",
       "destination": "/blogs/index.html"
     },

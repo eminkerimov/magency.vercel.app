@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import ContentState from "../components/ContentState";
+import CaseEvidence from "../components/CaseEvidence";
 import NotFound from "../components/NotFound";
 import { CasePreview } from "../components/SelectedWork";
 import Seo from "../components/Seo";
@@ -77,7 +78,6 @@ const WorkDetail = () => {
           <div className="work-detail__hero-grid">
             <div className="work-detail__intro">
               <div className="work-detail__meta">
-                <span>{study.index || String(activeIndex + 1).padStart(2, "0")}</span>
                 <span>{study.type}</span>
               </div>
               <p className="work-detail__name">{study.name}</p>
@@ -96,43 +96,77 @@ const WorkDetail = () => {
         </div>
       </section>
 
+      {study.facts?.length ? (
+        <section
+          className="work-detail__facts"
+          aria-label={`${study.name} project facts`}
+        >
+          <div className="container">
+            {study.facts.map((fact) => (
+              <div className="work-detail__fact" key={fact.label}>
+                <span>{fact.label}</span>
+                <strong>{fact.value}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="work-detail__body">
         <div className="container work-detail__body-grid">
           <aside className="work-detail__outline" aria-label="Case study outline">
             <span>Project outline</span>
             <a href="#challenge">Challenge</a>
             <a href="#delivered">Delivered</a>
+            <a href="#evidence">Build evidence</a>
             <a href="#decisions">Frontend decisions</a>
             <a href="#outcome">Outcome</a>
           </aside>
 
           <article className="work-detail__story">
             <section id="challenge">
-              <span className="work-detail__section-number">01 / Challenge</span>
-              <h2>Making the product easier to understand and use.</h2>
+              <span className="work-detail__section-label">Challenge</span>
+              <h2>
+                {study.sectionTitles?.challenge ||
+                  "Making the product easier to understand and use."}
+              </h2>
               <p>{study.challenge}</p>
             </section>
 
             <section id="delivered">
-              <span className="work-detail__section-number">02 / Delivered</span>
-              <h2>The experience that was built.</h2>
+              <span className="work-detail__section-label">Delivered</span>
+              <h2>
+                {study.sectionTitles?.delivered ||
+                  "The experience that was built."}
+              </h2>
               <div className="work-detail__cards">
-                {study.delivered?.map((item, index) => (
+                {study.delivered?.map((item) => (
                   <div key={item}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
                     <p>{item}</p>
                   </div>
                 ))}
               </div>
             </section>
 
+            {study.evidence?.length ? (
+              <section id="evidence" className="work-detail__evidence">
+                <CaseEvidence
+                  items={study.evidence}
+                  key={study.slug}
+                  projectName={study.name}
+                />
+              </section>
+            ) : null}
+
             <section id="decisions">
-              <span className="work-detail__section-number">03 / Frontend decisions</span>
-              <h2>Choices made for a durable interface.</h2>
+              <span className="work-detail__section-label">Frontend decisions</span>
+              <h2>
+                {study.sectionTitles?.decisions ||
+                  "Choices made for a durable interface."}
+              </h2>
               <ol className="work-detail__decisions">
-                {study.decisions?.map((item, index) => (
+                {study.decisions?.map((item) => (
                   <li key={item}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
                     <p>{item}</p>
                   </li>
                 ))}
@@ -140,7 +174,7 @@ const WorkDetail = () => {
             </section>
 
             <section id="outcome" className="work-detail__outcome">
-              <span className="work-detail__section-number">04 / Outcome</span>
+              <span className="work-detail__section-label">Outcome</span>
               <blockquote>{study.outcome}</blockquote>
             </section>
           </article>
@@ -163,8 +197,8 @@ const WorkDetail = () => {
       <section className="work-detail__contact">
         <div className="container">
           <p>Need the same level of focus on your product?</p>
-          <Link to={`/?interest=${study.engagement || "focused-build"}#contact`}>
-            Build something together <span aria-hidden="true">&#8599;</span>
+          <Link to={`/start-project?interest=${study.engagement || "focused-build"}&reference=${study.slug}`}>
+            Discuss a similar product <span aria-hidden="true">&#8599;</span>
           </Link>
         </div>
       </section>

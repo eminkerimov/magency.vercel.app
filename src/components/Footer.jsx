@@ -5,7 +5,7 @@ const footerNavigation = [
   ["Work", "/work"],
   ["Insights", "/blogs"],
   ["Topics", "/categories"],
-  ["Contact", "/#contact"],
+  ["Quick contact", "/#contact"],
 ];
 
 const Footer = () => (
@@ -32,7 +32,7 @@ const Footer = () => (
         <div className="site-footer__project">
           <span>Have a product challenge?</span>
           <p>Share the context and find the right starting point.</p>
-          <Link to="/#contact">Start a project <span aria-hidden="true">&#8599;</span></Link>
+          <Link to="/start-project">Send a project brief <span aria-hidden="true">&#8599;</span></Link>
         </div>
       </div>
 

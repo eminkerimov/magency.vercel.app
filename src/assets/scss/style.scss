@@ -9,9 +9,12 @@
 @use "./partial/__agency";
 @use "./partial/__contentState";
 @use "__work";
+@use "__startProject";
 @use "__notFound";
 @use "__blog";
 @use "__categories";
 @use "__innerBlog";
+@use "__motion";
 @use "./partial/__library";
+@use "./partial/__commandPalette";
 @use "__responsive";

@@ -318,14 +318,14 @@ const Blog = () => {
       setEmail("");
       setSubscriptionState({
         status: "success",
-        message: "You’re on the list. Watch your inbox for the next issue.",
+        message: "Demo preference saved in this browser. No email was sent.",
       });
     } catch (error) {
       if (error?.status === 409 || error?.code === "ALREADY_SUBSCRIBED") {
         setEmail("");
         setSubscriptionState({
           status: "success",
-          message: "This email is already on the list.",
+          message: "This email fingerprint is already saved in this browser.",
         });
         return;
       }
@@ -647,9 +647,12 @@ const Blog = () => {
 
             <aside className="articles-sidebar">
               <div className="articles-sidebar__block articles-newsletter">
-                <span>Weekly digest</span>
-                <h2>Useful engineering, without noise.</h2>
-                <p>One practical article every week.</p>
+                <span>Browser-only demo</span>
+                <h2>Try the newsletter flow.</h2>
+                <p>
+                  No email is sent. A one-way fingerprint is stored locally to
+                  demonstrate validation and duplicate handling.
+                </p>
 
                 <form
                   onSubmit={handleSubscribe}
@@ -660,7 +663,7 @@ const Blog = () => {
                     name="email"
                     value={email}
                     onChange={handleEmailChange}
-                    placeholder="Email address"
+                    placeholder="Email for local demo"
                     autoComplete="email"
                     aria-label="Email address"
                     aria-describedby={
@@ -677,8 +680,8 @@ const Blog = () => {
                     disabled={subscriptionState.status === "submitting"}
                   >
                     {subscriptionState.status === "submitting"
-                      ? "Subscribing…"
-                      : "Subscribe"}
+                      ? "Saving…"
+                      : "Save preference"}
                   </button>
                 </form>
 

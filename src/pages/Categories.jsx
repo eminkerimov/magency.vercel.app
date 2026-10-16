@@ -46,7 +46,7 @@ const categoryMeta = {
     stack: ["Testing", "RSC", "Release safety"],
   },
   "Engineering Career": {
-    icon: "01",
+    icon: "TL",
     eyebrow: "Leadership",
     color: "pink",
     description:
@@ -150,23 +150,21 @@ const Categories = () => {
             />
           ) : (
           <div className="categories-grid">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <article
                 className={`category-track category-track--${category.color}`}
                 key={category.name}
               >
                 <div className="category-track__header">
-                  <span className="category-track__index">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-
                   <span className="category-track__count">
                     {category.count}{" "}
                     {category.count === 1 ? "article" : "articles"}
                   </span>
                 </div>
 
-                <div className="category-track__icon">{category.icon}</div>
+                <div className="category-track__icon" aria-hidden="true">
+                  {category.icon}
+                </div>
 
                 <span className="category-track__eyebrow">
                   {category.eyebrow}

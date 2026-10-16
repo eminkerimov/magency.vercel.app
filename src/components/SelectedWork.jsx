@@ -75,13 +75,13 @@ export const CasePreview = ({ visual }) => {
           <div className="case-preview__story">
             <h4>Designers who shifted the frame</h4>
             <span className="case-preview__caption">
-              PEOPLE / 01
+              PEOPLE
             </span>
           </div>
           <div className="case-preview__story">
             <h4>Objects with connected histories</h4>
             <span className="case-preview__caption">
-              COLLECTION / 04
+              COLLECTION
             </span>
           </div>
         </div>
@@ -268,10 +268,6 @@ const SelectedWork = () => {
                     handleTabKeyDown(event, index)
                   }
                 >
-                  <span className="selected-work__tab-index">
-                    {study.index ||
-                      String(index + 1).padStart(2, "0")}
-                  </span>
                   <span className="selected-work__tab-copy">
                     <strong>{study.name || study.title}</strong>
                     <small>{study.type}</small>
@@ -301,11 +297,6 @@ const SelectedWork = () => {
               <div className="selected-work__content">
                 <div className="selected-work__meta">
                   <span>{activeCase.type}</span>
-                  <span>
-                    {activeCase.index ||
-                      String(activeIndex + 1).padStart(2, "0")}{" "}
-                    / {String(cases.length).padStart(2, "0")}
-                  </span>
                 </div>
                 <h3 className="selected-work__title">
                   {activeCase.title}
@@ -315,25 +306,26 @@ const SelectedWork = () => {
                 </p>
 
                 <div className="selected-work__details">
-                  <div className="selected-work__detail selected-work__detail--wide">
+                  <div className="selected-work__detail">
                     <h4>The challenge</h4>
-                    <p>{activeCase.challenge}</p>
+                    <p>
+                      {activeCase.sectionTitles?.challenge ||
+                        activeCase.challenge}
+                    </p>
                   </div>
                   <div className="selected-work__detail">
                     <h4>Delivered</h4>
-                    <ul>
-                      {activeCase.delivered?.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+                    <p>
+                      {activeCase.sectionTitles?.delivered ||
+                        activeCase.delivered?.[0]}
+                    </p>
                   </div>
                   <div className="selected-work__detail">
                     <h4>Frontend decisions</h4>
-                    <ul>
-                      {activeCase.decisions?.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+                    <p>
+                      {activeCase.sectionTitles?.decisions ||
+                        activeCase.decisions?.[0]}
+                    </p>
                   </div>
                 </div>
 
@@ -361,9 +353,9 @@ const SelectedWork = () => {
                   </Link>
                   <Link
                     className="selected-work__cta"
-                    to={`/?interest=${activeCase.engagement || "focused-build"}#contact`}
+                    to={`/start-project?interest=${activeCase.engagement || "focused-build"}&reference=${activeCase.slug}`}
                   >
-                    Build something together
+                    Discuss a similar product
                     <span aria-hidden="true">&#8599;</span>
                   </Link>
                 </div>

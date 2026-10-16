@@ -3,6 +3,7 @@ export const engagements = [
     id: "product-audit",
     type: "Focused review",
     title: "Product Audit",
+    formHint: "Review an existing product and prioritize the next move.",
     bestFor: "Existing web products that need a clear, evidence-based next step.",
     outcome:
       "A prioritized improvement plan grounded in the current product and codebase.",
@@ -19,6 +20,7 @@ export const engagements = [
     id: "focused-build",
     type: "Milestone delivery",
     title: "Focused Build",
+    formHint: "Ship a defined feature, workflow, or modernization milestone.",
     badge: "Core engagement",
     bestFor:
       "A defined feature, workflow, dashboard, or frontend modernization milestone.",
@@ -36,6 +38,7 @@ export const engagements = [
     id: "ongoing-support",
     type: "Flexible partnership",
     title: "Ongoing Product Support",
+    formHint: "Improve a live roadmap with senior product support.",
     bestFor:
       "Teams that need senior frontend support after launch or across an active roadmap.",
     outcome: "Steady improvements with visible priorities and regular review points.",

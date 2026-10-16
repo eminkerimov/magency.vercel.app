@@ -1,27 +1,5 @@
 import { Link } from "react-router-dom";
-
-const services = [
-  {
-    name: "Product & Frontend",
-    icon: "frontend",
-    desc: "Accessible, high-performance product interfaces shaped around real user and business goals",
-  },
-  {
-    name: "Backend & APIs",
-    icon: "backend",
-    desc: "Reliable APIs, data flows, and integrations designed to grow with the product",
-  },
-  {
-    name: "Cloud & DevOps",
-    icon: "cloud",
-    desc: "Practical cloud infrastructure, automated delivery, and observability for dependable releases",
-  },
-  {
-    name: "Technical Strategy",
-    icon: "strategy",
-    desc: "Clear technical direction, architecture reviews, and focused plans for complex product decisions",
-  },
-];
+import { services } from "../data/services";
 
 const ServiceIcon = ({ name }) => {
   const paths = {
@@ -38,20 +16,61 @@ const ServiceIcon = ({ name }) => {
   );
 };
 
+const handleServicePointerMove = (event) => {
+  if (
+    !window.matchMedia("(pointer: fine)").matches ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return;
+  }
+
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const x = (event.clientX - bounds.left) / bounds.width;
+  const y = (event.clientY - bounds.top) / bounds.height;
+
+  event.currentTarget.style.setProperty("--service-x", `${x * 100}%`);
+  event.currentTarget.style.setProperty("--service-y", `${y * 100}%`);
+  event.currentTarget.style.setProperty("--service-rotate-x", `${(0.5 - y) * 2.2}deg`);
+  event.currentTarget.style.setProperty("--service-rotate-y", `${(x - 0.5) * 2.6}deg`);
+};
+
+const resetServicePointer = (event) => {
+  ["--service-x", "--service-y", "--service-rotate-x", "--service-rotate-y"]
+    .forEach((property) => event.currentTarget.style.removeProperty(property));
+};
+
 const Services = () => (
   <section className="categories" id="services">
     <div className="container">
       <div className="categories__heading">
-        <span>What we do</span>
-        <h2>Engineering Services</h2>
-        <p>Focused product and engineering support from first decisions through reliable delivery.</p>
+        <div>
+          <span>What we do</span>
+          <h2>Engineering Services</h2>
+          <p>Focused product and engineering support from first decisions through reliable delivery.</p>
+        </div>
+        <div className="categories__signal">
+          <strong>One connected system</strong>
+          <p>One product-minded frontend perspective across interface, integration, delivery, and direction.</p>
+        </div>
       </div>
       <div className="categories__grid">
-        {services.map((service) => (
-          <Link className="category-card" to="/#contact" key={service.name}>
-            <div className="category-card__icon"><ServiceIcon name={service.icon} /></div>
+        {services.map((service, index) => (
+          <Link
+            className={`category-card${index === 0 || index === 3 ? " category-card--wide" : ""}`}
+            to={`/start-project?service=${service.id}`}
+            key={service.name}
+            onPointerMove={handleServicePointerMove}
+            onPointerLeave={resetServicePointer}
+          >
+            <div className="category-card__top">
+              <div className="category-card__icon"><ServiceIcon name={service.icon} /></div>
+            </div>
+            <span className="category-card__scope">{service.scope}</span>
             <h3>{service.name}</h3>
             <p>{service.desc}</p>
+            <ul className="category-card__deliverables" aria-label={`${service.name} deliverables`}>
+              {service.deliverables.map((item) => <li key={item}>{item}</li>)}
+            </ul>
             <span className="category-card__link">
               Discuss this service <span aria-hidden="true">&#8594;</span>
             </span>

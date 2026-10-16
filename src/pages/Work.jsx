@@ -8,6 +8,22 @@ const Work = () => {
   const { data, error, isError, isPending, refetch } = useCaseStudiesQuery();
   const cases = Array.isArray(data) ? data : [];
 
+  const handleCardPointerMove = (event) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const pointerX = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const pointerY = ((event.clientY - bounds.top) / bounds.height) * 100;
+
+    event.currentTarget.style.setProperty("--pointer-x", `${pointerX}%`);
+    event.currentTarget.style.setProperty("--pointer-y", `${pointerY}%`);
+  };
+
+  const resetCardPointer = (event) => {
+    event.currentTarget.style.removeProperty("--pointer-x");
+    event.currentTarget.style.removeProperty("--pointer-y");
+  };
+
   return (
     <main className="work-page">
       <Seo
@@ -20,7 +36,9 @@ const Work = () => {
         <div className="container work-hero__layout">
           <div className="work-hero__content">
             <span className="work-hero__eyebrow">Selected frontend work</span>
-            <h1>Products with a clear point of view.</h1>
+            <h1>
+              Products with a <span>clear point of view.</span>
+            </h1>
             <p>
               Independent builds that turn complex content, state, and user
               journeys into focused digital experiences.
@@ -28,7 +46,7 @@ const Work = () => {
           </div>
 
           <div className="work-hero__note">
-            <span>{String(cases.length || 3).padStart(2, "0")}</span>
+            <span>Selected case studies</span>
             <p>Case studies covering product UI, frontend systems, and client-side architecture.</p>
           </div>
         </div>
@@ -40,6 +58,25 @@ const Work = () => {
             <span>Case study index</span>
             <h2 id="work-index-title">Explore the work</h2>
           </div>
+
+          {!isPending && !isError && cases.length > 0 ? (
+            <nav className="work-index__jump" aria-label="Jump to a case study">
+              {cases.map((study) => (
+                <a
+                  className={`work-jump work-jump--${study.visual}`}
+                  href={`#case-${study.slug}`}
+                  key={study.slug}
+                >
+                  <span className="work-jump__mark" aria-hidden="true"></span>
+                  <span className="work-jump__copy">
+                    <strong>{study.name}</strong>
+                    <small>{study.type}</small>
+                  </span>
+                  <span className="work-jump__arrow" aria-hidden="true">&#8595;</span>
+                </a>
+              ))}
+            </nav>
+          ) : null}
 
           {isPending ? (
             <ContentState count={3} label="Loading case studies" />
@@ -59,10 +96,13 @@ const Work = () => {
             />
           ) : (
             <div className="work-index__list">
-              {cases.map((study, index) => (
+              {cases.map((study) => (
                 <article
                   className={`work-card work-card--${study.visual}`}
+                  id={`case-${study.slug}`}
                   key={study.slug}
+                  onPointerMove={handleCardPointerMove}
+                  onPointerLeave={resetCardPointer}
                 >
                   <div className="work-card__visual">
                     <CasePreview visual={study.visual} />
@@ -70,7 +110,6 @@ const Work = () => {
 
                   <div className="work-card__content">
                     <div className="work-card__meta">
-                      <span>{study.index || String(index + 1).padStart(2, "0")}</span>
                       <span>{study.type}</span>
                     </div>
                     <p className="work-card__name">{study.name}</p>
@@ -99,7 +138,7 @@ const Work = () => {
               <span>Have a product in motion?</span>
               <h2>Bring the next difficult interface into focus.</h2>
             </div>
-            <Link to="/?interest=focused-build#contact">
+            <Link to="/start-project?interest=focused-build&source=work">
               Start a project <span aria-hidden="true">&#8599;</span>
             </Link>
           </div>
