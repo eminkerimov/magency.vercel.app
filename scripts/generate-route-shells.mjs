@@ -21,6 +21,12 @@ const homeMetadata = {
 const routes = [
   homeMetadata,
   {
+    path: "/studio",
+    title: "The Studio - Perspective, Design & Engineering | M-Agency",
+    description:
+      "Explore the M-Agency studio perspective: product thinking, intentional interface design, frontend craft, and an interactive visual journal.",
+  },
+  {
     path: "/work",
     title: "Frontend Case Studies | M-Agency",
     description:

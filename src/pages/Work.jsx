@@ -104,7 +104,7 @@ const Work = () => {
                   onPointerMove={handleCardPointerMove}
                   onPointerLeave={resetCardPointer}
                 >
-                  <div className="work-card__visual">
+                  <div className="work-card__visual" style={{ viewTransitionName: `case-${study.slug}` }}>
                     <CasePreview visual={study.visual} />
                   </div>
 
@@ -120,7 +120,7 @@ const Work = () => {
                       {study.stack?.map((item) => <span key={item}>{item}</span>)}
                     </div>
 
-                    <Link to={`/work/${study.slug}`}>
+                    <Link to={`/work/${study.slug}`} viewTransition>
                       Read case study <span aria-hidden="true">&#8594;</span>
                     </Link>
                   </div>

@@ -11,6 +11,7 @@ const navigation = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/#services" },
   { label: "Work", href: "/work" },
+  { label: "Studio", href: "/studio" },
   { label: "Insights", href: "/blogs" },
   { label: "Topics", href: "/categories" },
 ];
@@ -165,6 +166,7 @@ const Header = () => {
     if (href === "/blogs") return pathname.startsWith("/blog");
     if (href === "/work") return pathname.startsWith("/work");
     if (href === "/categories") return pathname === "/categories";
+    if (href === "/studio") return pathname === "/studio";
     if (href === "/") return pathname === "/" && !hash;
 
     return pathname === "/" && hash === href.replace("/", "");
@@ -186,6 +188,7 @@ const Header = () => {
               onClick={handleNavigationClick("/")}
               ref={logoRef}
               to="/"
+              viewTransition
               aria-label="M-Agency home"
             >
               <span className="logo__mark" aria-hidden="true">M</span>
@@ -212,6 +215,7 @@ const Header = () => {
             <Link
               className="site-header__cta"
               to="/start-project"
+              viewTransition
               onClick={handleNavigationClick("/start-project")}
             >
               Start a project
@@ -247,6 +251,7 @@ const Header = () => {
                       <Link
                         className={active ? "is-active" : ""}
                         to={item.href}
+                        viewTransition
                         aria-current={active ? "page" : undefined}
                         onClick={handleNavigationClick(item.href)}
                       >

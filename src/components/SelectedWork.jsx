@@ -290,7 +290,7 @@ const SelectedWork = () => {
               aria-labelledby={`selected-work-tab-${activeIndex}`}
               tabIndex={0}
             >
-              <div className="selected-work__visual">
+              <div className="selected-work__visual" style={{ viewTransitionName: `case-${activeCase.slug}` }}>
                 <CasePreview visual={activeCase.visual} />
               </div>
 
@@ -347,6 +347,7 @@ const SelectedWork = () => {
                   <Link
                     className="selected-work__case-link"
                     to={`/work/${activeCase.slug}`}
+                    viewTransition
                   >
                     View full case study
                     <span aria-hidden="true">&#8594;</span>

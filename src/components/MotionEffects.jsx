@@ -18,24 +18,25 @@ const ITEM_SELECTOR = [
   ".work-cta__panel",
 ].join(", ");
 
-const TARGET_SELECTOR = ITEM_SELECTOR;
+const IMAGE_SELECTOR = "[data-motion-image]";
+const TARGET_SELECTOR = `${ITEM_SELECTOR}, ${IMAGE_SELECTOR}`;
 
 const MAX_STAGGER_INDEX = 6;
 
 const getStaggerIndex = (element) => {
-  if (!element.matches(ITEM_SELECTOR) || !element.parentElement) return 0;
+  if (!element.parentElement) return 0;
 
   const siblings = Array.from(element.parentElement.children).filter((sibling) =>
-    sibling.matches(ITEM_SELECTOR)
+    sibling.matches(TARGET_SELECTOR)
   );
 
   return Math.min(Math.max(siblings.indexOf(element), 0), MAX_STAGGER_INDEX);
 };
 
-const isInInitialViewport = (element) => {
+const isInViewport = (element) => {
   const bounds = element.getBoundingClientRect();
 
-  return bounds.bottom > 0 && bounds.top < window.innerHeight * 0.88;
+  return bounds.bottom > 0 && bounds.top < window.innerHeight;
 };
 
 const MotionEffects = () => {
@@ -49,24 +50,93 @@ const MotionEffects = () => {
     }
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    const trackedElements = new Set();
+    const trackedElements = new Map();
+    const pendingReveals = new Set();
     let intersectionObserver;
     let mutationObserver;
     let routeTimer;
+    let revealFrame;
     let isActive = false;
 
     const revealAndReset = () => {
-      trackedElements.forEach((element) => {
+      trackedElements.forEach((record, element) => {
+        record.cancelImageWait?.();
         intersectionObserver?.unobserve(element);
         element.classList.remove(
           "motion-reveal",
           "motion-reveal--item",
-          "motion-reveal--section",
-          "motion-reveal--visible"
+          "motion-reveal--visible",
+          "motion-image-reveal",
+          "motion-image-reveal--visible"
         );
         element.style.removeProperty("--motion-order");
       });
       trackedElements.clear();
+      pendingReveals.clear();
+      window.cancelAnimationFrame(revealFrame);
+      revealFrame = undefined;
+    };
+
+    const queueReveal = (element) => {
+      if (!isActive || !trackedElements.has(element)) return;
+
+      pendingReveals.add(element);
+      if (revealFrame) return;
+
+      // Two frames establish the masked state even for the first visible image.
+      revealFrame = window.requestAnimationFrame(() => {
+        revealFrame = window.requestAnimationFrame(() => {
+          revealFrame = undefined;
+          pendingReveals.forEach((target) => {
+            const record = trackedElements.get(target);
+            if (!record) return;
+
+            target.classList.add(
+              record.isImage
+                ? "motion-image-reveal--visible"
+                : "motion-reveal--visible"
+            );
+          });
+          pendingReveals.clear();
+        });
+      });
+    };
+
+    const revealElement = (element) => {
+      const record = trackedElements.get(element);
+      if (!record || record.revealing) return;
+
+      record.revealing = true;
+      intersectionObserver?.unobserve(element);
+
+      const image = record.isImage
+        ? element.matches("img")
+          ? element
+          : element.querySelector("img")
+        : null;
+
+      if (!image || image.complete) {
+        queueReveal(element);
+        return;
+      }
+
+      // Lazy photos should reveal the photo, not an empty loading surface.
+      // The timeout also guarantees broken or stalled images cannot hide UI.
+      let loadTimer;
+      const finish = () => {
+        record.cancelImageWait?.();
+        record.cancelImageWait = undefined;
+        queueReveal(element);
+      };
+
+      record.cancelImageWait = () => {
+        image.removeEventListener("load", finish);
+        image.removeEventListener("error", finish);
+        window.clearTimeout(loadTimer);
+      };
+      image.addEventListener("load", finish, { once: true });
+      image.addEventListener("error", finish, { once: true });
+      loadTimer = window.setTimeout(finish, 1600);
     };
 
     const registerElement = (element) => {
@@ -77,18 +147,19 @@ const MotionEffects = () => {
         return;
       }
 
-      const isItem = element.matches(ITEM_SELECTOR);
+      const isImage = element.matches(IMAGE_SELECTOR);
       const staggerIndex = getStaggerIndex(element);
 
-      trackedElements.add(element);
+      trackedElements.set(element, { isImage, revealing: false });
       element.style.setProperty("--motion-order", String(staggerIndex));
-      element.classList.add(
-        "motion-reveal",
-        isItem ? "motion-reveal--item" : "motion-reveal--section"
-      );
+      if (isImage) {
+        element.classList.add("motion-image-reveal");
+      } else {
+        element.classList.add("motion-reveal", "motion-reveal--item");
+      }
 
-      if (isInInitialViewport(element)) {
-        element.classList.add("motion-reveal--visible");
+      if (isInViewport(element)) {
+        revealElement(element);
         return;
       }
 
@@ -127,20 +198,20 @@ const MotionEffects = () => {
       root.classList.add("motion-route-enter");
       routeTimer = window.setTimeout(() => {
         root.classList.remove("motion-route-enter");
-      }, 720);
+      }, 420);
 
       intersectionObserver = new window.IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
 
-            entry.target.classList.add("motion-reveal--visible");
-            intersectionObserver?.unobserve(entry.target);
+            revealElement(entry.target);
           });
         },
         {
-          rootMargin: "0px 0px -10% 0px",
-          threshold: 0.08,
+          // No negative margin: the final image must reveal at the page bottom.
+          rootMargin: "0px",
+          threshold: 0,
         }
       );
 

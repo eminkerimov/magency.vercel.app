@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 const footerNavigation = [
   ["Services", "/#services"],
   ["Work", "/work"],
+  ["Studio", "/studio"],
   ["Insights", "/blogs"],
   ["Topics", "/categories"],
   ["Quick contact", "/#contact"],
@@ -24,7 +25,7 @@ const Footer = () => (
           <span>Explore</span>
           <ul className="site-footer__nav">
             {footerNavigation.map(([label, href]) => (
-              <li key={label}><Link to={href}>{label}</Link></li>
+              <li key={label}><Link to={href} viewTransition>{label}</Link></li>
             ))}
           </ul>
         </nav>

@@ -71,7 +71,7 @@ const WorkDetail = () => {
 
       <section className="work-detail__hero">
         <div className="container">
-          <Link className="work-detail__back" to="/work">
+          <Link className="work-detail__back" to="/work" viewTransition>
             <span aria-hidden="true">&#8592;</span> All case studies
           </Link>
 
@@ -89,7 +89,7 @@ const WorkDetail = () => {
               </div>
             </div>
 
-            <div className="work-detail__preview">
+            <div className="work-detail__preview" style={{ viewTransitionName: `case-${study.slug}` }}>
               <CasePreview visual={study.visual} />
             </div>
           </div>
@@ -183,11 +183,11 @@ const WorkDetail = () => {
 
       <nav className="work-detail__navigation" aria-label="Case study navigation">
         <div className="container">
-          <Link to={`/work/${previous.slug}`}>
+          <Link to={`/work/${previous.slug}`} viewTransition>
             <span>Previous project</span>
             <strong>{previous.name}</strong>
           </Link>
-          <Link to={`/work/${next.slug}`}>
+          <Link to={`/work/${next.slug}`} viewTransition>
             <span>Next project</span>
             <strong>{next.name}</strong>
           </Link>

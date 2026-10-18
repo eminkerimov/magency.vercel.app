@@ -17,6 +17,7 @@ Magency is a modern digital-agency experience built as a Senior Frontend Develop
 
 - `/` - agency overview, services, selected work, process, team, engagement formats, and contact flow
 - `/work` - responsive case-study catalogue for all three portfolio products
+- `/studio` - editorial studio page with interactive principles, a draggable photo journal, and an accessible fullscreen gallery
 - `/work/:slug` - full case narrative with challenge, delivery, frontend decisions, outcome, and adjacent-case navigation
 - `/start-project` - accessible three-step project brief with service, engagement, and case-study context
 - `/blogs` - searchable, sortable, paginated, and bookmark-aware insight library
@@ -32,6 +33,14 @@ routes are marked `noindex, nofollow`. Secondary pages are route-split and
 loaded on demand.
 
 ## API strategy
+
+The Studio journal uses local, credited stock photography. It is an illustrative
+moodboard, not a claim about a physical office or the people in the photos.
+Photo credits and source links live in `src/data/studioImages.js` and remain
+available in the fullscreen viewer. The gallery supports drag, native touch
+scrolling, arrow controls, and keyboard navigation. Page and shared-project
+transitions use the browser View Transitions API with a normal-navigation
+fallback; all motion respects `prefers-reduced-motion`.
 
 The application uses the same boundary it would use with a production backend: components call an API layer with standard `fetch` requests.
 

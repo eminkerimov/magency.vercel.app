@@ -14,6 +14,15 @@ import { useReadingProgressSummaries } from "../features/readingProgress";
 
 const PAGE_COMMANDS = [
   {
+    id: "page-studio",
+    kind: "page",
+    type: "Page",
+    title: "The Studio",
+    description: "Our perspective, working principles, and visual journal.",
+    to: "/studio",
+    keywords: ["about", "studio", "gallery", "approach", "photography"],
+  },
+  {
     id: "page-home",
     kind: "page",
     type: "Page",
@@ -494,6 +503,7 @@ const CommandPalette = ({ onClose, onNavigate }) => {
 
     onNavigate();
     navigate(item.to, {
+      viewTransition: true,
       state: {
         scrollRequest: Date.now(),
       },

@@ -19,6 +19,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const InnerBlog = lazy(() => import("./pages/InnerBlog"));
 const Categories = lazy(() => import("./pages/Categories"));
 const Work = lazy(() => import("./pages/Work"));
+const Studio = lazy(() => import("./pages/Studio"));
 const WorkDetail = lazy(() => import("./pages/WorkDetail"));
 const StartProject = lazy(() => import("./pages/StartProject"));
 
@@ -149,6 +150,10 @@ const router = createBrowserRouter([
       {
         path: "categories",
         element: <Categories />,
+      },
+      {
+        path: "studio",
+        element: <Studio />,
       },
       {
         path: "work",
