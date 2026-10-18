@@ -3,13 +3,30 @@ import fernandoPhoto from "../assets/img/author-devops.jpg";
 import adedayoPhoto from "../assets/img/author-career.jpg";
 import naratePhoto from "../assets/img/author-backend.jpg";
 import mayaPhoto from "../assets/img/testimonial-maya.jpg";
+import adrianAvatar from "../assets/img/avatar-adrian.jpg";
+import narateAvatar from "../assets/img/avatar-narate.jpg";
+import fernandoAvatar from "../assets/img/avatar-fernando.jpg";
+import adedayoAvatar from "../assets/img/avatar-adedayo.jpg";
+import mayaAvatar from "../assets/img/avatar-maya.jpg";
 
-const authorPortraitsByName = {
+// Locally bundled stock portraits for the fictional portfolio contributors.
+// Unsplash image IDs: Adrian 1506794778202-cad84cf45f1d,
+// Fernando 1696456254433-a03ae02443a6, Maya 1616639943825-e0fbad20a3d3.
+// Pexels photo IDs: Narate 9999322 (Kenzhar Sharap), Adedayo 9533891 (Andy Coffie).
+const authorEditorialPortraitsByName = {
   "Adrian Thomas": adrianPhoto,
   "Narate Ketram": naratePhoto,
   "Fernando Comet": fernandoPhoto,
   "Adedayo Saheed": adedayoPhoto,
   "Maya Chen": mayaPhoto,
+};
+
+const authorPortraitsByName = {
+  "Adrian Thomas": adrianAvatar,
+  "Narate Ketram": narateAvatar,
+  "Fernando Comet": fernandoAvatar,
+  "Adedayo Saheed": adedayoAvatar,
+  "Maya Chen": mayaAvatar,
 };
 
 export const authorProfilesByName = {
@@ -60,8 +77,12 @@ export function getAuthorProfile(name) {
   return authorProfilesByName[name.trim()] || genericAuthorProfile;
 }
 
-export function getAuthorPortrait(name) {
+export function getAuthorPortrait(name, variant = "avatar") {
   if (typeof name !== "string") return "";
 
-  return authorPortraitsByName[name.trim()] || "";
+  const portraits = variant === "editorial"
+    ? authorEditorialPortraitsByName
+    : authorPortraitsByName;
+
+  return portraits[name.trim()] || "";
 }

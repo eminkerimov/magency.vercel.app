@@ -25,7 +25,7 @@ const buildContributors = (articles) => {
       contributors.set(name, {
         ...profile,
         name,
-        image: getAuthorPortrait(name),
+        image: getAuthorPortrait(name, "editorial"),
         initials: getInitials(name),
         articleCount: 0,
       });
@@ -79,12 +79,12 @@ const Team = ({
           />
         ) : (
           <div className="top-authors__grid" role="list">
-            {contributors.map((member) => {
+            {contributors.map((member, index) => {
               const countLabel = `${member.articleCount} ${member.articleCount === 1 ? "insight" : "insights"}`;
 
               return (
                 <Link
-                  className="contributor-card"
+                  className={`contributor-card contributor-card--${index + 1}`}
                   key={member.name}
                   role="listitem"
                   to={`/blogs?q=${encodeURIComponent(member.name)}`}
@@ -98,15 +98,31 @@ const Team = ({
                     )}
                   </span>
 
-                  <span className="contributor-card__body">
+                  <span className="contributor-card__scrim" aria-hidden="true" />
+
+                  <span className="contributor-card__meta">
                     <span className="contributor-card__focus">{member.focus}</span>
+                    <span>{countLabel}</span>
+                  </span>
+
+                  <span className="contributor-card__body">
                     <strong>{member.name}</strong>
                     <span className="contributor-card__role">{member.role}</span>
+                    {index === 0 ? (
+                      <span className="contributor-card__bio">{member.bio}</span>
+                    ) : null}
                   </span>
 
                   <span className="contributor-card__footer">
-                    <span>{countLabel}</span>
-                    <span aria-hidden="true">{"\u2192"}</span>
+                    <span>Explore writing</span>
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M5 12H19M14 7L19 12L14 17" />
+                    </svg>
                   </span>
                 </Link>
               );

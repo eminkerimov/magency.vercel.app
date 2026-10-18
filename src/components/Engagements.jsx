@@ -81,7 +81,11 @@ const Engagements = () => {
                   <small>{engagement.type}</small>
                   <strong>{engagement.title}</strong>
                 </span>
-                <span className="engagement-tab__arrow" aria-hidden="true">&#8594;</span>
+                <span className="engagement-tab__arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M5 12h14M14 7l5 5-5 5" />
+                  </svg>
+                </span>
               </button>
             );
           })}

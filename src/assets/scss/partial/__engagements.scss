@@ -141,13 +141,28 @@
     &__arrow {
         width: 36px;
         height: 36px;
-        display: grid;
+        display: inline-grid;
+        flex: none;
+        overflow: hidden;
+        padding: 0;
         border-radius: 11px;
         color: #a9afc2;
         background: rgba(255, 255, 255, 0.055);
-        font-size: 17px;
+        line-height: 0;
         place-items: center;
         transition: color 240ms ease, background-color 240ms ease, transform 240ms ease;
+
+        svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            overflow: visible;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 1.6;
+        }
     }
 
     &:hover {
@@ -419,6 +434,10 @@
 @media only screen and (max-width: 767px) {
     .engagements {
         padding: 80px 0 86px;
+
+        &__rail {
+            grid-template-columns: 1fr;
+        }
 
         &__heading {
             align-items: flex-start;
